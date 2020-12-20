@@ -1,0 +1,7 @@
+CMake*
+detect*
+*autogen
+*.cmake
+*.cbp
+Qt-Hand-Gesture-App
+Makefile
