@@ -10,29 +10,47 @@
 #include <QListView>
 #include <QStatusBar>
 #include <QLabel>
+#include <QAction>
+
+#include "opencv2/opencv.hpp"
+
+#include "capture_thread.h"
 
 class MainWindow : public QMainWindow
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
-  ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
 private:
-  void initUI();
+    void initUI();
+    void createActions();
+    void displayCamera();
+
+private slots:
+    void updateFrame(cv::Mat *);
 
 private:
-  QLineEdit *predictionText;
+    QAction *recordAction;
 
-  QGraphicsScene *imageScene;
-  QGraphicsView *imageView;
+    QLineEdit *predictionText;
 
-  QPushButton *recordButton;
+    QGraphicsScene *imageScene;
+    QGraphicsView *imageView;
 
-  QListView *gestureList;
+    QPushButton *recordButton;
 
-  QStatusBar *mainStatusBar;
-  QLabel *mainStatusLabel;
+    QListView *gestureList;
+
+    QStatusBar *mainStatusBar;
+    QLabel *mainStatusLabel;
+
+    cv::Mat currentFrame;
+
+    // for capture thread
+    QMutex *dataLock;
+    CaptureThread *capturer;
 };
 #endif // MAINWINDOW_H
