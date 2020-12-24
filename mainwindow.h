@@ -11,6 +11,8 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QAction>
+#include <QDir>
+#include <QStandardItem>
 
 #include "opencv2/opencv.hpp"
 
@@ -28,6 +30,7 @@ private:
     void initUI();
     void createActions();
     void displayCamera();
+    void populateGestureList();
 
 private slots:
     void updateFrame(cv::Mat *);
@@ -43,6 +46,7 @@ private:
     QPushButton *recordButton;
 
     QListView *gestureList;
+    QStandardItemModel *listModel;
 
     QStatusBar *mainStatusBar;
     QLabel *mainStatusLabel;

@@ -1,4 +1,4 @@
-#include "opencv2/videoio.hpp"
+﻿#include "opencv2/videoio.hpp"
 
 // probably won't be included here
 #undef slots
@@ -22,7 +22,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUI()
 {
-    this->resize(800, 800);
+    this->resize(1100, 700);
 
     // setup a grid layout
     QGridLayout *mainLayout = new QGridLayout();
@@ -37,16 +37,22 @@ void MainWindow::initUI()
     // setup area for image display
     imageScene = new QGraphicsScene(this);
     imageView = new QGraphicsView(imageScene);
-    mainLayout->addWidget(imageView, 1, 0, 12, 1);
+    mainLayout->addWidget(imageView, 1, 0, 8, 1);
 
     // setup area for the record button
     recordButton = new QPushButton(this);
     recordButton->setText("Record");
-    mainLayout->addWidget(recordButton, 13, 0, Qt::AlignHCenter);
+    mainLayout->addWidget(recordButton, 9, 0, Qt::AlignHCenter);
 
     // setup area for the gestures list
     gestureList = new QListView(this);
-    mainLayout->addWidget(gestureList, 14, 0, 4, 1);
+    gestureList->setViewMode(QListView::IconMode);
+    gestureList->setResizeMode(QListView::Adjust);
+    gestureList->setSpacing(7);
+    gestureList->setWrapping(false);
+    listModel = new QStandardItemModel(this);
+    gestureList->setModel(listModel);
+    mainLayout->addWidget(gestureList, 10, 0, 4, 1);
 
     QWidget *widget = new QWidget();
     widget->setLayout(mainLayout);
@@ -57,6 +63,8 @@ void MainWindow::initUI()
     mainStatusLabel = new QLabel(mainStatusBar);
     mainStatusBar->addPermanentWidget(mainStatusLabel);
     mainStatusLabel->setText("click \'Record\' or space bar and start performing one of the gestures listed above");
+
+    populateGestureList();
 }
 
 void MainWindow::createActions()
@@ -77,10 +85,30 @@ void MainWindow::displayCamera()
     capturer->start();
 }
 
+void MainWindow::populateGestureList()
+{
+    QDir dir("./images");
+    QStringList nameFilters;
+    nameFilters << "*.gif";
+    QFileInfoList files = dir.entryInfoList(
+                              nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
+
+    foreach (QFileInfo cover, files) {
+        QString name = cover.baseName();
+        QStandardItem *item = new QStandardItem();
+        listModel->appendRow(item);
+        QModelIndex index = listModel->indexFromItem(item);
+        listModel->setData(index, QPixmap(cover.absoluteFilePath()).scaledToHeight(150),
+                           Qt::DecorationRole);
+        listModel->setData(index, name, Qt::DisplayRole);
+    }
+}
+
 void MainWindow::updateFrame(cv::Mat *mat)
 {
     dataLock->lock();
     currentFrame = *mat;
+    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
     dataLock->unlock();
 
     QImage frame(
