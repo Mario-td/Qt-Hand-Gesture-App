@@ -7,12 +7,12 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QPushButton>
-#include <QListView>
+#include <QList>
+#include <QMovie>
 #include <QStatusBar>
 #include <QLabel>
 #include <QAction>
 #include <QDir>
-#include <QStandardItem>
 
 #include "opencv2/opencv.hpp"
 
@@ -30,7 +30,7 @@ private:
     void initUI();
     void createActions();
     void displayCamera();
-    void populateGestureList();
+    void populateGestureVector();
 
 private slots:
     void updateFrame(cv::Mat *);
@@ -45,8 +45,8 @@ private:
 
     QPushButton *recordButton;
 
-    QListView *gestureList;
-    QStandardItemModel *listModel;
+    QList<QMovie *> *gifMovieList;
+    QList<QLabel *> *gifList;
 
     QStatusBar *mainStatusBar;
     QLabel *mainStatusLabel;

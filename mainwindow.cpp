@@ -32,27 +32,46 @@ void MainWindow::initUI()
     predictionText->setReadOnly(true);
     predictionText->setText("Hi there!");
     predictionText->setAlignment(Qt::AlignCenter);
-    mainLayout->addWidget(predictionText, 0, 0, Qt::AlignHCenter);
+    mainLayout->addWidget(predictionText, 0, 2, Qt::AlignHCenter);
 
     // setup area for image display
     imageScene = new QGraphicsScene(this);
     imageView = new QGraphicsView(imageScene);
-    mainLayout->addWidget(imageView, 1, 0, 8, 1);
+    mainLayout->addWidget(imageView, 1, 0, 9, 5);
 
     // setup area for the record button
     recordButton = new QPushButton(this);
     recordButton->setText("Record");
-    mainLayout->addWidget(recordButton, 9, 0, Qt::AlignHCenter);
+    mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
 
-    // setup area for the gestures list
-    gestureList = new QListView(this);
-    gestureList->setViewMode(QListView::IconMode);
-    gestureList->setResizeMode(QListView::Adjust);
-    gestureList->setSpacing(7);
-    gestureList->setWrapping(false);
-    listModel = new QStandardItemModel(this);
-    gestureList->setModel(listModel);
-    mainLayout->addWidget(gestureList, 10, 0, 4, 1);
+    // setup area for the gesture gif list
+    gifList = new QList<QLabel *>;
+    gifMovieList = new QList<QMovie *>;
+    QDir dir("./images");
+    QStringList nameFilters;
+    nameFilters << "*.gif";
+    QFileInfoList files = dir.entryInfoList(
+                              nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
+    // populates the gif list
+    for (int i = 0, n = files.size(); i < n; ++i) {
+        gifList->append(new QLabel());
+        gifMovieList->append(new QMovie(gifList->back()));
+        gifMovieList->back()->setFileName(files[i].filePath());
+        gifList->back()->setMovie(gifMovieList->back());
+
+        // gets the size of the gif to resize it
+        gifMovieList->back()->jumpToFrame(0);
+        QSize gifSize = gifMovieList->back()->currentImage().size();
+        gifMovieList->back()->setScaledSize(gifSize * 0.65);
+        gifMovieList->back()->start();
+        mainLayout->addWidget(gifList->back(), 11, i, Qt::AlignHCenter);
+
+        QString name = files[i].baseName();
+        QLabel *gestureName = new QLabel(this);
+        gestureName->setText(name);
+        gestureName->setAlignment(Qt::AlignHCenter);
+        mainLayout->addWidget(gestureName, 12, i, Qt::AlignHCenter);
+    }
 
     QWidget *widget = new QWidget();
     widget->setLayout(mainLayout);
@@ -63,8 +82,6 @@ void MainWindow::initUI()
     mainStatusLabel = new QLabel(mainStatusBar);
     mainStatusBar->addPermanentWidget(mainStatusLabel);
     mainStatusLabel->setText("click \'Record\' or space bar and start performing one of the gestures listed above");
-
-    populateGestureList();
 }
 
 void MainWindow::createActions()
@@ -74,34 +91,10 @@ void MainWindow::createActions()
 
 void MainWindow::displayCamera()
 {
-
-//    if (capturer != nullptr) {
-//        capturer->setRunning(false);
-//        disconnect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
-//    }
     int camID = 0;
     capturer = new CaptureThread(camID, dataLock);
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     capturer->start();
-}
-
-void MainWindow::populateGestureList()
-{
-    QDir dir("./images");
-    QStringList nameFilters;
-    nameFilters << "*.gif";
-    QFileInfoList files = dir.entryInfoList(
-                              nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
-
-    foreach (QFileInfo cover, files) {
-        QString name = cover.baseName();
-        QStandardItem *item = new QStandardItem();
-        listModel->appendRow(item);
-        QModelIndex index = listModel->indexFromItem(item);
-        listModel->setData(index, QPixmap(cover.absoluteFilePath()).scaledToHeight(150),
-                           Qt::DecorationRole);
-        listModel->setData(index, name, Qt::DisplayRole);
-    }
 }
 
 void MainWindow::updateFrame(cv::Mat *mat)
