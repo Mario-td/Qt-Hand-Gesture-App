@@ -1,9 +1,9 @@
-#include "utilities.h"
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(int camera, QMutex *lock):
     cameraID(camera), dataLock(lock)
 {
+    recording = false;
 }
 
 CaptureThread::~CaptureThread()
@@ -23,6 +23,7 @@ void CaptureThread::run()
     while (running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
+        if (recording) qDebug() << "recording\n";
 
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
         dataLock->lock();

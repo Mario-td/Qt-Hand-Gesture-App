@@ -34,6 +34,7 @@ private:
 
 private slots:
     void updateFrame(cv::Mat *);
+    void recordingGesture();
 
 private:
     QAction *recordAction;

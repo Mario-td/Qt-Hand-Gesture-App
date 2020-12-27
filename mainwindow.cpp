@@ -43,6 +43,7 @@ void MainWindow::initUI()
     recordButton = new QPushButton(this);
     recordButton->setText("Record");
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
+    connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(recordingGesture()));
 
     // setup area for the gesture gif list
     gifList = new QList<QLabel *>;
@@ -101,8 +102,9 @@ void MainWindow::updateFrame(cv::Mat *mat)
 {
     dataLock->lock();
     currentFrame = *mat;
-    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
     dataLock->unlock();
+
+    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
     QImage frame(
         currentFrame.data,
@@ -117,4 +119,9 @@ void MainWindow::updateFrame(cv::Mat *mat)
     imageScene->addPixmap(image);
     imageScene->update();
     imageView->setSceneRect(image.rect());
+}
+
+void MainWindow::recordingGesture()
+{
+    capturer->setRecording(true);
 }

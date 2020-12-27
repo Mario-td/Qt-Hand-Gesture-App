@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QDebug>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
@@ -13,9 +14,9 @@ class CaptureThread : public QThread
 public:
     CaptureThread(int camera, QMutex *lock);
     ~CaptureThread();
-    void setRunning(bool run)
+    void setRecording(bool record)
     {
-        running = run;
+        recording = record;
     };
 
 protected:
@@ -26,6 +27,7 @@ signals:
 
 private:
     bool running;
+    bool recording;
     int cameraID;
     QMutex *dataLock;
     cv::Mat frame;
