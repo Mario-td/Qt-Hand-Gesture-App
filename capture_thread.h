@@ -3,7 +3,8 @@
 
 #include <QThread>
 #include <QMutex>
-#include <QDebug>
+#include <QDebug> // to be removed
+#include <QElapsedTimer> // to be removed
 #include <QVector>
 
 #include "opencv2/opencv.hpp"
@@ -20,6 +21,7 @@ public:
     {
         recording = record;
     };
+    void recordGesture(const cv::Mat &frame);
 
 protected:
     void run() override;
@@ -33,6 +35,10 @@ private:
     int cameraID;
     QMutex *displayedDataLock;
     cv::Mat frame;
+
+    // for debugging
+    QElapsedTimer timer;
+    bool timerFlag = true;
 
     // for predicting thread
     PredictGestureThread *predictor;

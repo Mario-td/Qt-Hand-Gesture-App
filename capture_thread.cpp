@@ -1,5 +1,3 @@
-#include <QElapsedTimer>
-
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(int camera, QMutex *lock):
@@ -22,32 +20,11 @@ void CaptureThread::run()
     predictor = new PredictGestureThread(predictingFrames, predictingDataLock);
     predictor->start();
 
-    int seqFrameIdx = 0;
-
-    QElapsedTimer timer;
-    bool timerFlag = true;
-
     while (running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
         if (recording) {
-            if (timerFlag) {
-                timerFlag = false;
-                timer.start();
-            }
-            // TODO: implementing a method
-            predictingDataLock->lock();
-            predictingFrames.push_back(tmpFrame);
-            predictingDataLock->unlock();
-            seqFrameIdx++;
-            if (seqFrameIdx > 31) {
-                int elapsed_ms = timer.elapsed();
-                qDebug() << elapsed_ms;
-                setRecording(false);
-                seqFrameIdx = 0;
-                predictingFrames.clear();
-                timerFlag = true;
-            }
+            recordGesture(tmpFrame);
         }
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
         displayedDataLock->lock();
@@ -57,4 +34,29 @@ void CaptureThread::run()
     }
     cap.release();
     running = false;
+}
+
+void CaptureThread::recordGesture(const cv::Mat &frame)
+{
+    static int sequenceFrameIdx = 0;
+
+    if (timerFlag) {
+        timerFlag = false;
+        timer.start();
+    }
+
+    predictingDataLock->lock();
+    predictingFrames.push_back(frame);
+    qDebug() << "frame saved " << predictingFrames.size();
+    predictingDataLock->unlock();
+    sequenceFrameIdx++;
+
+    if (sequenceFrameIdx > 31) {
+        int elapsed_ms = timer.elapsed();
+        qDebug() << elapsed_ms;
+        setRecording(false);
+        sequenceFrameIdx = 0;
+        predictingFrames.clear();
+        timerFlag = true;
+    }
 }
