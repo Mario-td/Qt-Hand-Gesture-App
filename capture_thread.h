@@ -4,16 +4,18 @@
 #include <QThread>
 #include <QMutex>
 #include <QDebug>
+#include <QVector>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
+
+#include "predict_gesture_thread.h"
 
 class CaptureThread : public QThread
 {
     Q_OBJECT
 public:
     CaptureThread(int camera, QMutex *lock);
-    ~CaptureThread();
     void setRecording(bool record)
     {
         recording = record;
@@ -29,8 +31,13 @@ private:
     bool running;
     bool recording;
     int cameraID;
-    QMutex *dataLock;
+    QMutex *displayedDataLock;
     cv::Mat frame;
+
+    // for predicting thread
+    PredictGestureThread *predictor;
+    QMutex *predictingDataLock;
+    QVector<cv::Mat> predictingFrames;
 };
 
 #endif // CAPTURETHREAD_H

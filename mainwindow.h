@@ -37,8 +37,6 @@ private slots:
     void recordingGesture();
 
 private:
-    QAction *recordAction;
-
     QLineEdit *predictionText;
 
     QGraphicsScene *imageScene;
@@ -55,7 +53,7 @@ private:
     cv::Mat currentFrame;
 
     // for capture thread
-    QMutex *dataLock;
+    QMutex *displayedDataLock;
     CaptureThread *capturer;
 };
 #endif // MAINWINDOW_H

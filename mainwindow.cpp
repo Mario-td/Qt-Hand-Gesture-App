@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     , capturer(nullptr)
 {
     initUI();
-    dataLock = new QMutex();
+    displayedDataLock = new QMutex();
     displayCamera();
 }
 
@@ -93,16 +93,16 @@ void MainWindow::createActions()
 void MainWindow::displayCamera()
 {
     int camID = 0;
-    capturer = new CaptureThread(camID, dataLock);
+    capturer = new CaptureThread(camID, displayedDataLock);
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     capturer->start();
 }
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    dataLock->lock();
+    displayedDataLock->lock();
     currentFrame = *mat;
-    dataLock->unlock();
+    displayedDataLock->unlock();
 
     cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
