@@ -12,17 +12,15 @@ class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(QVector<cv::Mat> frameVector, QMutex *lock);
+    PredictGestureThread(bool &run, QVector<cv::Mat> &frameVector, QMutex *lock);
 
 protected:
     void run() override;
 
-signals:
-    // void frame
-
 private:
+    bool *running;
     bool predicted;
-    QVector<cv::Mat> predictingFrames;
+    QVector<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
 };
 

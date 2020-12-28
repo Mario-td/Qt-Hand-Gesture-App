@@ -1,12 +1,14 @@
 #include "predict_gesture_thread.h"
 
-PredictGestureThread::PredictGestureThread(QVector<cv::Mat> frameVector, QMutex *lock):
-    predictingFrames(frameVector), predictingDataLock(lock)
+PredictGestureThread::PredictGestureThread(bool &run, QVector<cv::Mat> &frameVector, QMutex *lock):
+    running(&run), predicted(false), predictingFrames(&frameVector), predictingDataLock(lock)
 {
-    predicted = false;
 }
 
 void PredictGestureThread::run()
 {
     qDebug() << "predicting";
+    while (*running) {
+        // qDebug() << predictingFrames->size();
+    }
 }
