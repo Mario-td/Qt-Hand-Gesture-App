@@ -1,11 +1,4 @@
-﻿#include "opencv2/videoio.hpp"
-
-// probably won't be included here
-#undef slots
-#include "torch/script.h"
-#define slots Q_SLOTS
-
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -22,7 +15,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUI()
 {
-    this->resize(1100, 700);
+    this->resize(1000, 700);
 
     // setup a grid layout
     QGridLayout *mainLayout = new QGridLayout();

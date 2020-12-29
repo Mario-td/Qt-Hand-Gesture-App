@@ -45,17 +45,17 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
     }
 
     predictingDataLock->lock();
-    predictingFrames.push_back(frame);
+    predictingFrames.enqueue(frame.clone());
     qDebug() << "frame saved " << predictingFrames.size();
     predictingDataLock->unlock();
     sequenceFrameIdx++;
 
-    if (sequenceFrameIdx > 31) {
+    if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
         int elapsed_ms = timer.elapsed();
         qDebug() << elapsed_ms;
         setRecording(false);
         sequenceFrameIdx = 0;
-        predictingFrames.clear();
+        //  predictingFrames.clear();
         timerFlag = true;
     }
 }

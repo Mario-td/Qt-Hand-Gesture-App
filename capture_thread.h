@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QDebug> // to be removed
 #include <QElapsedTimer> // to be removed
-#include <QVector>
+#include <QQueue>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
@@ -43,7 +43,7 @@ private:
     // for predicting thread
     PredictGestureThread *predictor;
     QMutex *predictingDataLock;
-    QVector<cv::Mat> predictingFrames;
+    QQueue<cv::Mat> predictingFrames;
 };
 
 #endif // CAPTURETHREAD_H

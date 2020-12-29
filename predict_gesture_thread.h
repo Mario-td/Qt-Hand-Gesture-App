@@ -3,16 +3,22 @@
 
 #include <QThread>
 #include <QMutex>
-#include <QVector>
+#include <QQueue>
 #include <QDebug>
 
 #include "opencv2/opencv.hpp"
+
+#undef slots
+#include "torch/script.h"
+#define slots Q_SLOTS
+
+#include "utilities.h"
 
 class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(bool &run, QVector<cv::Mat> &frameVector, QMutex *lock);
+    PredictGestureThread(bool &run, QQueue<cv::Mat> &frameVector, QMutex *lock);
 
 protected:
     void run() override;
@@ -20,7 +26,7 @@ protected:
 private:
     bool *running;
     bool predicted;
-    QVector<cv::Mat> *predictingFrames;
+    QQueue<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
 };
 
