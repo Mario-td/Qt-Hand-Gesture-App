@@ -48,6 +48,9 @@ void PredictGestureThread::run()
                 }
             }
             sequenceIdx++;
+            extractingKeypoints = false;
+            qDebug() << "extracted keypoints from frame " << sequenceIdx << ", input tensor: ";
+            // std::cout << inputTensor;
         }
     }
 }

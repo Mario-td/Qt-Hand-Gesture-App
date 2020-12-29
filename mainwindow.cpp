@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     initUI();
     displayedDataLock = new QMutex();
+    // TODO load the models here
     displayCamera();
 }
 

@@ -46,7 +46,7 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 
     predictingDataLock->lock();
     predictingFrames.enqueue(frame.clone());
-    qDebug() << "frame saved " << predictingFrames.size();
+    // qDebug() << "frame saved " << sequenceFrameIdx;//predictingFrames.size();
     predictingDataLock->unlock();
     sequenceFrameIdx++;
 

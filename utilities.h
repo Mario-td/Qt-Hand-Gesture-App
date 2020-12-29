@@ -17,29 +17,6 @@ public:
     static constexpr unsigned short FRAMES_PER_SEQUENCE = 32;
     static constexpr unsigned short KEYPOINTS = 21;
 
-    static const std::vector<float> HAND_COLORS_RENDER {
-        100.f, 100.f, 100.f,
-        100.f, 0.f, 0.f,
-        150.f, 0.f, 0.f,
-        200.f, 0.f, 0.f,
-        255.f, 0.f, 0.f,
-        100.f, 100.f, 0.f,
-        150.f, 150.f, 0.f,
-        200.f, 200.f, 0.f,
-        255.f, 255.f, 0.f,
-        0.f, 100.f, 50.f,
-        0.f, 150.f, 75.f,
-        0.f, 200.f, 100.f,
-        0.f, 255.f, 125.f,
-        0.f, 50.f, 100.f,
-        0.f, 75.f, 150.f,
-        0.f, 100.f, 200.f,
-        0.f, 125.f, 255.f,
-        100.f, 0.f, 100.f,
-        150.f, 0.f, 150.f,
-        200.f, 0.f, 200.f,
-        255.f, 0.f, 255.f};
-
     static void nmslocation(cv::Mat &src, std::map<float, cv::Point2f, std::greater<float>> &location,
                             float threshold);
     static float transformNetInput(torch::Tensor &inputTensor, const cv::Mat &src_img,

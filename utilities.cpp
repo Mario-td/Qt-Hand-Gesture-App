@@ -192,32 +192,8 @@ std::vector<std::map<float, cv::Point2f> > Utilities::pyramidinference(
             return many_keypoints;
     }
 
-    // parameters for drawing
-    //
-    const auto thicknessCircleRatio = 1.f / 120.f;
-    const auto thicknessCircle = std::max(int(sqrt(inputImage.cols * inputImage.rows) *
-                                              thicknessCircleRatio + 0.5f), 2);
-    int numberColors = HAND_COLORS_RENDER.size();
-
     // for each small image detect the joint points
     detecthand(many_keypoints, model, inputImage, handrect);
-
-    // drawing
-    for (int currjointIndex = 0; currjointIndex < 21; currjointIndex++) {
-        const cv::Scalar curr_color{HAND_COLORS_RENDER[(currjointIndex * 3) % numberColors],
-                                    HAND_COLORS_RENDER[(currjointIndex * 3 + 1) % numberColors],
-                                    HAND_COLORS_RENDER[(currjointIndex * 3 + 2) % numberColors]};
-        for (auto it = many_keypoints[currjointIndex].begin(); it != many_keypoints[currjointIndex].end();
-                it++) {
-            circle(inputImage, it->second, thicknessCircle, curr_color, -1);
-        }
-    }
-
-    // rectangle
-    for (int i = 0; i < handrect.size(); i++) {
-        rectangle(inputImage, handrect[i], cv::Scalar(0, 255, 0),
-                  std::min(inputImage.cols / TRAIN_IMAGE_WIDTH * 3.f, 3.f));
-    }
 
     return many_keypoints;
 }
