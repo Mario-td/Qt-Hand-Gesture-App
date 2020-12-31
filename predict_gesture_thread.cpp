@@ -1,7 +1,8 @@
 #include "predict_gesture_thread.h"
 
-PredictGestureThread::PredictGestureThread(bool &run, QQueue<cv::Mat> &frameVector, QMutex *lock):
-    running(&run), predicted(false), predictingFrames(&frameVector), predictingDataLock(lock)
+PredictGestureThread::PredictGestureThread(bool &run, bool &predict, QQueue<cv::Mat> &frameVector,
+                                           QMutex *lock):
+    running(&run), predicted(&predict), predictingFrames(&frameVector), predictingDataLock(lock)
 {
 }
 
@@ -49,8 +50,26 @@ void PredictGestureThread::run()
             }
             sequenceIdx++;
             extractingKeypoints = false;
+
             qDebug() << "extracted keypoints from frame " << sequenceIdx << ", input tensor: ";
             // std::cout << inputTensor;
+
+            // set to cero after completing a sequence
+            if (sequenceIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
+                qDebug() << "Finished with the sequence";
+
+                sequenceIdx = 0;
+
+                // Forwards the input throught the model
+                inputs.push_back(inputTensor);
+                auto output = gestureModel.forward(inputs).toTensor();
+
+                qDebug() << "You performed " << output.argmax(1).item().toInt();
+
+                inputs.clear();
+
+                *predicted = true;
+            }
         }
     }
 }

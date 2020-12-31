@@ -41,6 +41,7 @@ private:
     bool timerFlag = true;
 
     // for predicting thread
+    bool predicted;
     PredictGestureThread *predictor;
     QMutex *predictingDataLock;
     QQueue<cv::Mat> predictingFrames;
