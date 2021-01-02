@@ -1,18 +1,20 @@
 #include "predict_gesture_thread.h"
 
-PredictGestureThread::PredictGestureThread(bool &run, bool &predict, QQueue<cv::Mat> &frameVector,
+PredictGestureThread::PredictGestureThread(bool &run, QQueue<cv::Mat> &frameVector,
                                            QMutex *lock):
-    running(&run), predicted(&predict), predictingFrames(&frameVector), predictingDataLock(lock)
+    running(&run), predictingFrames(&frameVector), predictingDataLock(lock)
 {
+    handKeypointModel = new torch::jit::script::Module(torch::jit::load("./hand.pts", torch::kCUDA));
+    gestureClassificationModel = new torch::jit::script::Module(torch::jit::load("./model.pt"));
+}
+
+void PredictGestureThread::ExtractKeypoints(cv::Mat &frame)
+{
+
 }
 
 void PredictGestureThread::run()
 {
-    // Loads the model for hand keypoints detection and gesture classification
-    torch::jit::script::Module handModel = torch::jit::load("./hand.pts", torch::kCUDA);
-
-    torch::jit::script::Module gestureModel = torch::jit::load("./model.pt");
-
     std::vector<torch::jit::IValue> inputs;
     torch::Tensor inputTensor = torch::zeros({1, Utilities::KEYPOINTS * 2, Utilities::FRAMES_PER_SEQUENCE});
 
@@ -39,10 +41,10 @@ void PredictGestureThread::run()
             // TODO implement a method
             std::vector<std::map<float, cv::Point2f>> handKeypoints;
             std::vector<cv::Rect> handrect;
-            handKeypoints = Utilities::pyramidinference(handModel, recordedFrame, handrect);
+            handKeypoints = Utilities::pyramidinference(*handKeypointModel, recordedFrame, handrect);
 
             // Assigns the coordinates of the keypoints to the tensor, for each time step
-            for (int i = 0, n = handKeypoints.size(); i < n; i++) {
+            for (int i = 0; i < Utilities::KEYPOINTS; i++) {
                 if (!handKeypoints[i].empty()) {
                     inputTensor[0][2 * i][sequenceIdx] = handKeypoints[i].begin()->second.x;
                     inputTensor[0][2 * i + 1][sequenceIdx] = handKeypoints[i].begin()->second.y;
@@ -50,9 +52,6 @@ void PredictGestureThread::run()
             }
             sequenceIdx++;
             extractingKeypoints = false;
-
-            qDebug() << "extracted keypoints from frame " << sequenceIdx << ", input tensor: ";
-            // std::cout << inputTensor;
 
             // set to cero after completing a sequence
             if (sequenceIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
@@ -62,13 +61,11 @@ void PredictGestureThread::run()
 
                 // Forwards the input throught the model
                 inputs.push_back(inputTensor);
-                auto output = gestureModel.forward(inputs).toTensor();
+                auto output = gestureClassificationModel->forward(inputs).toTensor();
 
                 qDebug() << "You performed " << output.argmax(1).item().toInt();
 
                 inputs.clear();
-
-                *predicted = true;
             }
         }
     }

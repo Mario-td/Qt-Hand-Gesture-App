@@ -38,6 +38,7 @@ private slots:
     void recordingGesture();
 
 private:
+    // UI elements
     QLineEdit *predictionText;
 
     QGraphicsScene *imageScene;

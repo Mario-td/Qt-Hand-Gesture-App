@@ -18,14 +18,18 @@ class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(bool &run, bool &predict, QQueue<cv::Mat> &frameVector, QMutex *lock);
+    PredictGestureThread(bool &run, QQueue<cv::Mat> &frameVector, QMutex *lock);
+    void ExtractKeypoints(cv::Mat &frame);
 
 protected:
     void run() override;
 
 private:
+    // Deep Learning models for hand keypoints detection and gesture classification
+    torch::jit::script::Module *handKeypointModel;
+    torch::jit::script::Module *gestureClassificationModel;
+
     bool *running;
-    bool *predicted;
     QQueue<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
 };
