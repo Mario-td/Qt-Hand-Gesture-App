@@ -15,7 +15,7 @@ public:
 
     // Number of frames per sequence and number of keypoints detected in each frame
     static constexpr unsigned short FRAMES_PER_SEQUENCE = 32;
-    static constexpr unsigned short KEYPOINTS = 21;
+    static constexpr unsigned short NUM_KEYPOINTS = 21;
 
     static void nmslocation(cv::Mat &src, std::map<float, cv::Point2f, std::greater<float>> &location,
                             float threshold);

@@ -10,7 +10,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
 
-#include "predict_gesture_thread.h"
+#include "predict_gesture_thread.h" // to be removed and include utilities, after constructing the predictor object from mainwindow
 
 class CaptureThread : public QThread
 {
