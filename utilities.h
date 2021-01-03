@@ -17,6 +17,9 @@ public:
     static constexpr unsigned short FRAMES_PER_SEQUENCE = 32;
     static constexpr unsigned short NUM_KEYPOINTS = 21;
 
+    // Gesture labels
+    static constexpr const char *GESTURE_NAMES[] = {"WAWING", "SCISSORS", "FLIP", "PUSH&PULL", "OPEN&CLOSE"};
+
     static void nmslocation(cv::Mat &src, std::map<float, cv::Point2f, std::greater<float>> &location,
                             float threshold);
     static float transformNetInput(torch::Tensor &inputTensor, const cv::Mat &src_img,

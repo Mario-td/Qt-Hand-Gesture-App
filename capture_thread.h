@@ -20,11 +20,11 @@ public:
     {
         return running;
     };
-    QQueue<cv::Mat> *getPredictingFrames()
+    QQueue<cv::Mat> *getPredictingFrames() const
     {
         return predictingFrames;
     };
-    QMutex *getPredictingDataLock()
+    QMutex *getPredictingDataLock() const
     {
         return predictingDataLock;
     };

@@ -90,9 +90,8 @@ void MainWindow::displayCamera()
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     capturer->start();
 
-// TODO construct the predictor here to pass mainwindow elements as arguments
     classifier = new PredictGestureThread(capturer->getRunning(), capturer->getPredictingFrames(),
-                                          capturer->getPredictingDataLock());
+                                          capturer->getPredictingDataLock(), predictionText);
     classifier->start();
 }
 

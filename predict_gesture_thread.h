@@ -7,12 +7,14 @@
 #include <QMutex>
 #include <QQueue>
 #include <QDebug>
+#include <QLineEdit>
 
 class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(bool &run, QQueue<cv::Mat> *frameVector, QMutex *lock);
+    PredictGestureThread(bool &run, QQueue<cv::Mat> *frameVector, QMutex *lock,
+                         QLineEdit *predictText);
     void ExtractKeypoints();
     void DequeueSequenceFrame();
 
@@ -28,6 +30,8 @@ private:
     bool *running;
     QQueue<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
+
+    QLineEdit *predictionText;
 
     bool extractingKeypoints;
     cv::Mat recordedFrame;
