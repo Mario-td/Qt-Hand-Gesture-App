@@ -1,16 +1,11 @@
 #ifndef CAPTURETHREAD_H
 #define CAPTURETHREAD_H
 
-#include <QThread>
-#include <QMutex>
-#include <QDebug> // to be removed
-#include <QElapsedTimer> // to be removed
-#include <QQueue>
+#include "predict_gesture_thread.h" // to be removed and include utilities, after constructing the predictor object from mainwindow
 
-#include "opencv2/opencv.hpp"
 #include "opencv2/videoio.hpp"
 
-#include "predict_gesture_thread.h" // to be removed and include utilities, after constructing the predictor object from mainwindow
+#include <QElapsedTimer> // to be removed
 
 class CaptureThread : public QThread
 {
@@ -20,6 +15,18 @@ public:
     void setRecording(bool record)
     {
         recording = record;
+    };
+    bool &getRunning()
+    {
+        return running;
+    };
+    QQueue<cv::Mat> *getPredictingFrames()
+    {
+        return predictingFrames;
+    };
+    QMutex *getPredictingDataLock()
+    {
+        return predictingDataLock;
     };
     void recordGesture(const cv::Mat &frame);
 
@@ -43,7 +50,7 @@ private:
     // for predicting thread
     PredictGestureThread *predictor;
     QMutex *predictingDataLock;
-    QQueue<cv::Mat> predictingFrames;
+    QQueue<cv::Mat> *predictingFrames;
 };
 
 #endif // CAPTURETHREAD_H

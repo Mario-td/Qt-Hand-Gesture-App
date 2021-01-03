@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "capture_thread.h"
+
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QLineEdit>
@@ -13,11 +15,6 @@
 #include <QLabel>
 #include <QAction>
 #include <QDir>
-
-#include "opencv2/opencv.hpp"
-#include "opencv2/videoio.hpp"
-
-#include "capture_thread.h"
 
 class MainWindow : public QMainWindow
 {
@@ -57,5 +54,8 @@ private:
     // for capture thread
     QMutex *displayedDataLock;
     CaptureThread *capturer;
+
+    // for predicting thread
+    PredictGestureThread *classifier;
 };
 #endif // MAINWINDOW_H
