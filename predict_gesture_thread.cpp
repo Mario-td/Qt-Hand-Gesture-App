@@ -1,8 +1,8 @@
 #include "predict_gesture_thread.h"
 
-PredictGestureThread::PredictGestureThread(bool &run, QQueue<cv::Mat> *frameVector,
+PredictGestureThread::PredictGestureThread(bool *run, QQueue<cv::Mat> *frameVector,
                                            QMutex *lock, QLineEdit *predictText):
-    running(&run), predictingFrames(frameVector), predictingDataLock(lock), predictionText(predictText),
+    running(run), predictingFrames(frameVector), predictingDataLock(lock), predictionText(predictText),
     extractingKeypoints(false), sequenceIdx(0)
 {
     handKeypointModel = torch::jit::script::Module(torch::jit::load("./hand.pts", torch::kCUDA));
