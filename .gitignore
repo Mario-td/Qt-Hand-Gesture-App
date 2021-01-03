@@ -1,4 +1,6 @@
-CMake*
+CMakeFiles
+CMakeLists.txt.user
+CMakeCache*
 detect*
 *autogen
 *.cmake
