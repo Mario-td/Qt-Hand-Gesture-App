@@ -5,7 +5,7 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
 {
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
-    running = new bool();
+    running = std::make_shared<bool>();
 }
 
 void CaptureThread::run()
@@ -32,7 +32,6 @@ void CaptureThread::run()
     }
     cap.release();
     *running = false;
-    delete running;
 }
 
 void CaptureThread::recordGesture(const cv::Mat &frame)

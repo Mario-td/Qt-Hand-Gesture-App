@@ -1,7 +1,7 @@
 #ifndef CAPTURETHREAD_H
 #define CAPTURETHREAD_H
 
-#include "predict_gesture_thread.h" // to be removed and include utilities, after constructing the predictor object from mainwindow
+#include "predict_gesture_thread.h"
 
 #include "opencv2/videoio.hpp"
 
@@ -16,7 +16,7 @@ public:
     {
         recording = record;
     };
-    bool *getRunning() const
+    std::shared_ptr<bool> getRunning() const
     {
         return running;
     };
@@ -37,7 +37,7 @@ signals:
     void frameCaptured(cv::Mat *data);
 
 private:
-    bool *running;
+    std::shared_ptr<bool> running;
     bool recording;
     int cameraID;
     QMutex *displayedDataLock;

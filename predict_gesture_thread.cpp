@@ -1,6 +1,6 @@
 #include "predict_gesture_thread.h"
 
-PredictGestureThread::PredictGestureThread(bool *run, QQueue<cv::Mat> *frameVector,
+PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector,
                                            QMutex *lock, QLineEdit *predictText):
     running(run), predictingFrames(frameVector), predictingDataLock(lock), predictionText(predictText),
     extractingKeypoints(false), sequenceIdx(0)

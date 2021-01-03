@@ -13,7 +13,7 @@ class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(bool *run, QQueue<cv::Mat> *frameVector, QMutex *lock,
+    PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector, QMutex *lock,
                          QLineEdit *predictText);
     void ExtractKeypoints();
     void DequeueSequenceFrame();
@@ -27,7 +27,7 @@ private:
     torch::jit::script::Module handKeypointModel;
     torch::jit::script::Module gestureClassificationModel;
 
-    bool *running;
+    std::shared_ptr<bool> running;
     QQueue<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
 
