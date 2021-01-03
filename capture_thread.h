@@ -16,7 +16,7 @@ public:
     {
         recording = record;
     };
-    bool &getRunning()
+    bool *getRunning() const
     {
         return running;
     };
@@ -37,7 +37,7 @@ signals:
     void frameCaptured(cv::Mat *data);
 
 private:
-    bool running;
+    bool *running;
     bool recording;
     int cameraID;
     QMutex *displayedDataLock;

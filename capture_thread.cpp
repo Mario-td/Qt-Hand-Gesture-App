@@ -1,15 +1,16 @@
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(int camera, QMutex *lock):
-    running(false), recording(false), cameraID(camera), displayedDataLock(lock)
+    recording(false), cameraID(camera), displayedDataLock(lock)
 {
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
+    running = new bool();
 }
 
 void CaptureThread::run()
 {
-    running = true;
+    *running = true;
 
     cv::VideoCapture cap(cameraID);
     cv::Mat tmpFrame;
@@ -17,10 +18,7 @@ void CaptureThread::run()
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
 
-//    predictor = new PredictGestureThread(running, predictingFrames, predictingDataLock);
-//    predictor->start();
-
-    while (running) {
+    while (*running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
         if (recording) {
@@ -33,7 +31,8 @@ void CaptureThread::run()
         emit frameCaptured(&frame);
     }
     cap.release();
-    running = false;
+    *running = false;
+    delete running;
 }
 
 void CaptureThread::recordGesture(const cv::Mat &frame)
