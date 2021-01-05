@@ -1,9 +1,9 @@
 #include "predict_gesture_thread.h"
 
 PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector,
-                                           QMutex *lock, QLineEdit *predictText):
-    running(run), predictingFrames(frameVector), predictingDataLock(lock), predictionText(predictText),
-    extractingKeypoints(false), sequenceIdx(0)
+                                           QMutex *lock):
+    running(run), predictingFrames(frameVector), predictingDataLock(lock), extractingKeypoints(false),
+    sequenceIdx(0)
 {
     handKeypointModel = torch::jit::script::Module(torch::jit::load("./hand.pts", torch::kCUDA));
     gestureClassificationModel = torch::jit::script::Module(torch::jit::load("./model.pt"));
@@ -36,9 +36,8 @@ void PredictGestureThread::ExtractKeypoints()
         gestureClassificationModelInput.push_back(gestureSequenceTensor);
         auto output = gestureClassificationModel.forward(gestureClassificationModelInput).toTensor();
 
-        predictionText->setText(QString("You performed ")
-                                + QString(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]));
-        predictionText->setFixedWidth(220);
+        // set button visibility after the prediction
+        emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
 
         gestureClassificationModelInput.clear();
     }

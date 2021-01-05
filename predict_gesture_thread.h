@@ -7,19 +7,20 @@
 #include <QMutex>
 #include <QQueue>
 #include <QDebug>
-#include <QLineEdit>
 
 class PredictGestureThread : public QThread
 {
     Q_OBJECT
 public:
-    PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector, QMutex *lock,
-                         QLineEdit *predictText);
+    PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector, QMutex *lock);
     void ExtractKeypoints();
     void DequeueSequenceFrame();
 
 protected:
     void run() override;
+
+signals:
+    void finishedPrediction(const char *);
 
 private:
 
@@ -30,8 +31,6 @@ private:
     std::shared_ptr<bool> running;
     QQueue<cv::Mat> *predictingFrames;
     QMutex *predictingDataLock;
-
-    QLineEdit *predictionText;
 
     bool extractingKeypoints;
     cv::Mat recordedFrame;

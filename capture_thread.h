@@ -35,6 +35,7 @@ protected:
 
 signals:
     void frameCaptured(cv::Mat *data);
+    void finishedRecording(int *elapsedTime);
 
 private:
     std::shared_ptr<bool> running;
@@ -46,6 +47,7 @@ private:
     // for debugging
     QElapsedTimer timer;
     bool timerFlag = true;
+    int *elapsedTime;
 
     // for predicting thread
     PredictGestureThread *predictor;

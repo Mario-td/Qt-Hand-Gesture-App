@@ -49,8 +49,8 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
     sequenceFrameIdx++;
 
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
-        int elapsed_ms = timer.elapsed();
-        qDebug() << elapsed_ms;
+        *elapsedTime = timer.elapsed();
+        emit finishedRecording(elapsedTime);
         setRecording(false);
         sequenceFrameIdx = 0;
         timerFlag = true;

@@ -26,17 +26,18 @@ public:
 
 private:
     void initUI();
-    void createActions();
     void displayCamera();
     void populateGestureVector();
 
 private slots:
     void updateFrame(cv::Mat *);
     void recordingGesture();
+    void updateWindowAfterRecording(int *elapsedTime);
+    void updateWindowAfterPredicting(const char *gestureName);
 
 private:
     // UI elements
-    QLineEdit *predictionText;
+    QLabel *predictionText;
 
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
