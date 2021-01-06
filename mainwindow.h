@@ -9,6 +9,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QPushButton>
+#include <QKeyEvent>
 #include <QList>
 #include <QMovie>
 #include <QStatusBar>
@@ -28,6 +29,9 @@ private:
     void initUI();
     void displayCamera();
     void populateGestureVector();
+
+protected:
+    virtual void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void updateFrame(cv::Mat *);

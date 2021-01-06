@@ -13,6 +13,8 @@ class PredictGestureThread : public QThread
     Q_OBJECT
 public:
     PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector, QMutex *lock);
+
+private:
     void ExtractKeypoints();
     void DequeueSequenceFrame();
     void passThroughGestureModel();

@@ -98,6 +98,14 @@ void MainWindow::displayCamera()
     classifier->start();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Space && recordButton->isVisible())
+        updateWindowWhileRecording();
+    else if (event->key() == Qt::Key_Escape)
+        this->close();
+}
+
 void MainWindow::updateFrame(cv::Mat *mat)
 {
     displayedDataLock->lock();

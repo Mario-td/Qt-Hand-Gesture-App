@@ -7,7 +7,6 @@
 class Utilities
 {
 public:
-
     static constexpr int TRAIN_IMAGE_HEIGHT = 256;
     static constexpr int TRAIN_IMAGE_WIDTH = 256;
     static constexpr double LABEL_MIN = 0.2;

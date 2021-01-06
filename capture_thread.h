@@ -28,6 +28,8 @@ public:
     {
         return predictingDataLock;
     };
+
+private:
     void recordGesture(const cv::Mat &frame);
 
 protected:
