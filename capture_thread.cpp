@@ -10,6 +10,8 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
 
 void CaptureThread::run()
 {
+    qDebug("capturing thread");
+
     *running = true;
 
     cv::VideoCapture cap(cameraID);
@@ -21,10 +23,14 @@ void CaptureThread::run()
     while (*running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
+
+        // frame used to predict the gesture
         if (recording) {
             recordGesture(tmpFrame);
         }
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
+
+        // frame used to display in the UI
         displayedDataLock->lock();
         frame = tmpFrame;
         displayedDataLock->unlock();
@@ -36,18 +42,19 @@ void CaptureThread::run()
 
 void CaptureThread::recordGesture(const cv::Mat &frame)
 {
-    static int sequenceFrameIdx = 0;
-
+    // starts the timer when the first frame is enqueued
     if (timerFlag) {
         timerFlag = false;
         timer.start();
     }
 
+    static int sequenceFrameIdx = 0;
     predictingDataLock->lock();
     predictingFrames->enqueue(frame.clone());
     predictingDataLock->unlock();
     sequenceFrameIdx++;
 
+    // resets the variables when the sequence finishes
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
         *elapsedTime = timer.elapsed();
         emit finishedRecording(elapsedTime);

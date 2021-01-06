@@ -15,6 +15,7 @@ public:
     PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv::Mat> *frameVector, QMutex *lock);
     void ExtractKeypoints();
     void DequeueSequenceFrame();
+    void passThroughGestureModel();
 
 protected:
     void run() override;

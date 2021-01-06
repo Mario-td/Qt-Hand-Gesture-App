@@ -9,9 +9,35 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
     gestureClassificationModel = torch::jit::script::Module(torch::jit::load("./model.pt"));
 }
 
+void PredictGestureThread::run()
+{
+    qDebug("predicting thread");
+
+    while (*running) {
+
+        // if it is not extracting keypoints from a frame then dequeue the next frame if it's available
+        if (!extractingKeypoints) {
+            DequeueSequenceFrame();
+        } else {
+            ExtractKeypoints();
+        }
+    }
+}
+
+void PredictGestureThread::DequeueSequenceFrame()
+{
+    // Dequeues a frame if the buffer is not empty
+    predictingDataLock->lock();
+    if (!predictingFrames->empty()) {
+        recordedFrame = predictingFrames->front();
+        extractingKeypoints = true;
+        predictingFrames->dequeue();
+    }
+    predictingDataLock->unlock();
+}
+
 void PredictGestureThread::ExtractKeypoints()
 {
-
     // Declares a vector to store the handkeypoint locations and performs the inference for each frame
     std::vector<std::map<float, cv::Point2f>> handKeypoints;
     std::vector<cv::Rect> handrect;
@@ -30,41 +56,18 @@ void PredictGestureThread::ExtractKeypoints()
     // set to cero after completing a sequence
     if (sequenceIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
         sequenceIdx = 0;
-
-        // TODO implement method for passing the input through the DL model
-        // Forwards the input through the sequence classification model
-        gestureClassificationModelInput.push_back(gestureSequenceTensor);
-        auto output = gestureClassificationModel.forward(gestureClassificationModelInput).toTensor();
-
-        // set button visibility after the prediction
-        emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
-
-        gestureClassificationModelInput.clear();
+        passThroughGestureModel();
     }
 }
 
-void PredictGestureThread::DequeueSequenceFrame()
+void PredictGestureThread::passThroughGestureModel()
 {
-    predictingDataLock->lock();
-    if (!predictingFrames->empty()) {
-        recordedFrame = predictingFrames->front();
-        extractingKeypoints = true;
-        predictingFrames->dequeue();
-    }
-    predictingDataLock->unlock();
-}
+    // Forwards the input through the sequence classification model
+    gestureClassificationModelInput.push_back(gestureSequenceTensor);
+    auto output = gestureClassificationModel.forward(gestureClassificationModelInput).toTensor();
 
-void PredictGestureThread::run()
-{
-    qDebug() << "predicting thread";
+    // set button visibility after the prediction
+    emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
 
-    while (*running) {
-
-        // if it is not extracting keypoints from a frame then dequeue the next frame if it's available
-        if (!extractingKeypoints) {
-            DequeueSequenceFrame();
-        } else {
-            ExtractKeypoints();
-        }
-    }
+    gestureClassificationModelInput.clear();
 }

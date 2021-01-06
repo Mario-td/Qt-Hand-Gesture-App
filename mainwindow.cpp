@@ -35,7 +35,7 @@ void MainWindow::initUI()
     recordButton = new QPushButton(this);
     recordButton->setText("Record");
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
-    connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(recordingGesture()));
+    connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
     // setup area for the gesture gif list
     gifList = new QList<QLabel *>;
@@ -59,6 +59,7 @@ void MainWindow::initUI()
         gifMovieList->back()->start();
         mainLayout->addWidget(gifList->back(), 11, i, Qt::AlignHCenter);
 
+        // setup the name of the gestures
         QString name = files[i].baseName();
         QLabel *gestureName = new QLabel(this);
         gestureName->setText(name);
@@ -75,16 +76,21 @@ void MainWindow::initUI()
     mainStatusLabel = new QLabel(mainStatusBar);
     mainStatusBar->addPermanentWidget(mainStatusLabel);
     mainStatusLabel->setText("Click \'Record\' or press space bar and start performing one of the gestures listed above");
+
 }
 
 void MainWindow::displayCamera()
 {
+    // set the used camera ID
     int camID = 0;
     capturer = new CaptureThread(camID, displayedDataLock);
+
+    // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
     capturer->start();
 
+    // creates a predict gesture thread object and connects the signals to the mainwindow slots
     classifier = new PredictGestureThread(capturer->getRunning(), capturer->getPredictingFrames(),
                                           capturer->getPredictingDataLock());
     connect(classifier, &PredictGestureThread::finishedPrediction, this,
@@ -115,24 +121,23 @@ void MainWindow::updateFrame(cv::Mat *mat)
     imageView->setSceneRect(image.rect());
 }
 
-void MainWindow::recordingGesture()
+void MainWindow::updateWindowWhileRecording()
 {
     capturer->setRecording(true);
+    predictionText->setText("");
 
     // keeps the widget space after making it invisible
     QSizePolicy retainButtonSpace = recordButton->sizePolicy();
     retainButtonSpace.setRetainSizeWhenHidden(true);
     recordButton->setSizePolicy(retainButtonSpace);
     recordButton->setVisible(false);
-
     mainStatusLabel->setText("Recording");
 }
 
 void MainWindow::updateWindowAfterRecording(int *elapsedTime)
 {
-    predictionText->setText(QString("You can stop. The sequence took ")
+    predictionText->setText(QString("You can stop. Duration: ")
                             + QString::number((float(*elapsedTime) / 1000 )) + QString(" s"));
-
     mainStatusLabel->setText("Predicting gesture");
 }
 
@@ -141,6 +146,5 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     predictionText->setText(QString("You performed ")
                             + QString(gestureName));
     recordButton->setVisible(true);
-
     mainStatusLabel->setText("Ready. Click \'Record\' or press space bar");
 }

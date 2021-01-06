@@ -31,7 +31,7 @@ private:
 
 private slots:
     void updateFrame(cv::Mat *);
-    void recordingGesture();
+    void updateWindowWhileRecording();
     void updateWindowAfterRecording(int *elapsedTime);
     void updateWindowAfterPredicting(const char *gestureName);
 

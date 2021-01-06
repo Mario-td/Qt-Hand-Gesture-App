@@ -5,7 +5,7 @@
 
 #include "opencv2/videoio.hpp"
 
-#include <QElapsedTimer> // to be removed
+#include <QElapsedTimer>
 
 class CaptureThread : public QThread
 {
