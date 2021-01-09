@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     initUI();
     displayedDataLock = new QMutex();
-    displayCamera();
+    appIntro();
 }
 
 MainWindow::~MainWindow()
@@ -31,6 +31,15 @@ void MainWindow::initUI()
     imageView = new QGraphicsView(imageScene);
     mainLayout->addWidget(imageView, 1, 0, 9, 5);
 
+    // setup the robot image
+    QDir dirImages("./images");
+    robotImage = new QPixmap(dirImages.path() + "/robot.png");
+    imageScene->addPixmap(*robotImage)->setPos(0, 10);
+
+    QPixmap bulbImage (dirImages.path() + "/bulb.png");
+    imageScene->addPixmap(bulbImage)->setPos(140, -40);
+    imageScene->setSceneRect(robotImage->rect());
+
     // setup area for the record button
     recordButton = new QPushButton(this);
     recordButton->setText("Record");
@@ -40,10 +49,9 @@ void MainWindow::initUI()
     // setup area for the gesture gif list
     gifList = new QList<QLabel *>;
     gifMovieList = new QList<QMovie *>;
-    QDir dir("./images");
     QStringList nameFilters;
     nameFilters << "*.gif";
-    QFileInfoList files = dir.entryInfoList(
+    QFileInfoList files = dirImages.entryInfoList(
                               nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
     // populates the gif list
     for (int i = 0, n = files.size(); i < n; ++i) {
@@ -72,6 +80,17 @@ void MainWindow::initUI()
     setCentralWidget(widget);
 }
 
+void MainWindow::appIntro()
+{
+    // keeps the widget space after making it invisible
+    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
+    retainButtonSpace.setRetainSizeWhenHidden(true);
+    recordButton->setSizePolicy(retainButtonSpace);
+    recordButton->setVisible(false);
+
+    displayCamera();
+}
+
 void MainWindow::displayCamera()
 {
     // set the used camera ID
@@ -81,6 +100,7 @@ void MainWindow::displayCamera()
     // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
+    connect(capturer, &CaptureThread::cameraReady, this, &MainWindow::giveUserInstructions);
     capturer->start();
 
     // creates a predict gesture thread object and connects the signals to the mainwindow slots
@@ -89,6 +109,11 @@ void MainWindow::displayCamera()
     connect(classifier, &PredictGestureThread::finishedPrediction, this,
             &MainWindow::updateWindowAfterPredicting);
     classifier->start();
+}
+
+void MainWindow::giveUserInstructions()
+{
+    predictionText->setText("Press \"Record\" and make some of the gestures listed below");
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

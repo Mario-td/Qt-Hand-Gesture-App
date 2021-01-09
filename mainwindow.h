@@ -9,6 +9,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QPushButton>
+#include <QGraphicsPixmapItem>
 #include <QKeyEvent>
 #include <QList>
 #include <QMovie>
@@ -27,8 +28,10 @@ public:
 
 private:
     void initUI();
+    void appIntro();
     void displayCamera();
     void populateGestureVector();
+    void giveUserInstructions();
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -45,6 +48,9 @@ private:
 
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
+
+    QPixmap *robotImage;
+    QPixmap *bulbImage;
 
     QPushButton *recordButton;
 
