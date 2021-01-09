@@ -67,16 +67,9 @@ void MainWindow::initUI()
         mainLayout->addWidget(gestureName, 12, i, Qt::AlignHCenter);
     }
 
-    QWidget *widget = new QWidget();
+    QWidget *widget = new QWidget(this);
     widget->setLayout(mainLayout);
     setCentralWidget(widget);
-
-    // setup status bar
-    mainStatusBar = statusBar();
-    mainStatusLabel = new QLabel(mainStatusBar);
-    mainStatusBar->addPermanentWidget(mainStatusLabel);
-    mainStatusLabel->setText("Click \'Record\' or press space bar and start performing one of the gestures listed above");
-
 }
 
 void MainWindow::displayCamera()
@@ -139,14 +132,11 @@ void MainWindow::updateWindowWhileRecording()
     retainButtonSpace.setRetainSizeWhenHidden(true);
     recordButton->setSizePolicy(retainButtonSpace);
     recordButton->setVisible(false);
-    mainStatusLabel->setText("Recording");
 }
 
-void MainWindow::updateWindowAfterRecording(int *elapsedTime)
+void MainWindow::updateWindowAfterRecording()
 {
-    predictionText->setText(QString("You can stop. Duration: ")
-                            + QString::number((float(*elapsedTime) / 1000 )) + QString(" s"));
-    mainStatusLabel->setText("Predicting gesture");
+    predictionText->setText(QString("You can stop"));
 }
 
 void MainWindow::updateWindowAfterPredicting(const char *gestureName)
@@ -154,5 +144,4 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     predictionText->setText(QString("You performed ")
                             + QString(gestureName));
     recordButton->setVisible(true);
-    mainStatusLabel->setText("Ready. Click \'Record\' or press space bar");
 }

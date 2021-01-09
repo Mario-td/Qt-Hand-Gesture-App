@@ -36,7 +36,7 @@ protected:
 private slots:
     void updateFrame(cv::Mat *);
     void updateWindowWhileRecording();
-    void updateWindowAfterRecording(int *elapsedTime);
+    void updateWindowAfterRecording();
     void updateWindowAfterPredicting(const char *gestureName);
 
 private:
@@ -50,9 +50,6 @@ private:
 
     QList<QMovie *> *gifMovieList;
     QList<QLabel *> *gifList;
-
-    QStatusBar *mainStatusBar;
-    QLabel *mainStatusLabel;
 
     cv::Mat currentFrame;
 

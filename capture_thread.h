@@ -37,7 +37,7 @@ protected:
 
 signals:
     void frameCaptured(cv::Mat *data);
-    void finishedRecording(int *elapsedTime);
+    void finishedRecording();
 
 private:
     std::shared_ptr<bool> running;
@@ -45,11 +45,6 @@ private:
     int cameraID;
     QMutex *displayedDataLock;
     cv::Mat frame;
-
-    // for debugging
-    QElapsedTimer timer;
-    bool timerFlag = true;
-    int *elapsedTime;
 
     // for predicting thread
     PredictGestureThread *predictor;

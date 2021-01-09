@@ -42,12 +42,6 @@ void CaptureThread::run()
 
 void CaptureThread::recordGesture(const cv::Mat &frame)
 {
-    // starts the timer when the first frame is enqueued
-    if (timerFlag) {
-        timerFlag = false;
-        timer.start();
-    }
-
     static int sequenceFrameIdx = 0;
     predictingDataLock->lock();
     predictingFrames->enqueue(frame.clone());
@@ -56,12 +50,8 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 
     // resets the variables when the sequence finishes
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
-        *elapsedTime = timer.elapsed();
-        emit finishedRecording(elapsedTime);
+        emit finishedRecording();
         setRecording(false);
         sequenceFrameIdx = 0;
-        timerFlag = true;
     }
 }
-
-
