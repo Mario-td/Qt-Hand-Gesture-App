@@ -37,6 +37,7 @@ protected:
 
 signals:
     void cameraReady();
+    void howToUseInfo();
     void frameCaptured(cv::Mat *data);
     void finishedRecording();
 

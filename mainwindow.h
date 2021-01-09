@@ -31,7 +31,6 @@ private:
     void appIntro();
     void displayCamera();
     void populateGestureVector();
-    void giveUserInstructions();
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -41,6 +40,8 @@ private slots:
     void updateWindowWhileRecording();
     void updateWindowAfterRecording();
     void updateWindowAfterPredicting(const char *gestureName);
+    void askForUserCommands();
+    void giveUserInstructions();
 
 private:
     // UI elements

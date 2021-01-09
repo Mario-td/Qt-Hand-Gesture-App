@@ -22,9 +22,11 @@ void MainWindow::initUI()
 
     // setup area for the text of the predicted gesture
     predictionText = new QLabel(this);
-    predictionText->setText("Hi there!");
+    QFont predictionTextFont("Sans serif", 35, QFont::Bold);
+    predictionText->setText("Hi! Give me some commands with your hand");
+    predictionText->setFont(predictionTextFont);
     predictionText->setAlignment(Qt::AlignCenter);
-    mainLayout->addWidget(predictionText, 0, 2, Qt::AlignHCenter);
+    mainLayout->addWidget(predictionText, 0, 0, 1, 5);
 
     // setup area for image display
     imageScene = new QGraphicsScene(this);
@@ -100,7 +102,8 @@ void MainWindow::displayCamera()
     // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
-    connect(capturer, &CaptureThread::cameraReady, this, &MainWindow::giveUserInstructions);
+    connect(capturer, &CaptureThread::cameraReady, this, &MainWindow::askForUserCommands);
+    connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
     capturer->start();
 
     // creates a predict gesture thread object and connects the signals to the mainwindow slots
@@ -111,9 +114,15 @@ void MainWindow::displayCamera()
     classifier->start();
 }
 
+void MainWindow::askForUserCommands()
+{
+    predictionText->setText("make some of the gestures listed below");
+}
+
 void MainWindow::giveUserInstructions()
 {
-    predictionText->setText("Press \"Record\" and make some of the gestures listed below");
+    predictionText->setText("click \"Record\" or press spacebar and start");
+    recordButton->setVisible(true);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

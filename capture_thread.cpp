@@ -5,7 +5,7 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
 {
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
-    running = std::make_shared<bool>();
+    running = std::make_shared<bool>(true);
 }
 
 void CaptureThread::run()
@@ -20,10 +20,9 @@ void CaptureThread::run()
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
 
     QThread::sleep(6);
-
     emit cameraReady();
-
-    *running = true;
+    QThread::sleep(6);
+    emit howToUseInfo();
 
     while (*running) {
         cap >> tmpFrame;
