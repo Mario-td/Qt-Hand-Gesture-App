@@ -16,10 +16,6 @@ public:
     {
         recording = record;
     };
-//    void setDisplaying(bool display)
-//    {
-//        displaying = display;
-//    };
     std::shared_ptr<bool> getRunning() const
     {
         return running;
@@ -32,6 +28,8 @@ public:
     {
         return predictingDataLock;
     };
+    void startIntervalTimer();
+    int getIntervalElapsedTime() const;
 
 private:
     void recordGesture(const cv::Mat &frame);
@@ -58,6 +56,8 @@ private:
     int cameraID;
     QMutex *displayedDataLock;
     cv::Mat frame;
+    int gestureDuration;
+    QElapsedTimer frameIntervalTimer;
 
     // for predicting thread
     PredictGestureThread *predictor;

@@ -6,6 +6,17 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
     running = std::make_shared<bool>(true);
+    gestureDuration = 5000; // ms
+}
+
+void CaptureThread::startIntervalTimer()
+{
+    frameIntervalTimer.start();
+}
+
+int CaptureThread::getIntervalElapsedTime() const
+{
+    return frameIntervalTimer.elapsed();
 }
 
 void CaptureThread::run()
@@ -24,13 +35,21 @@ void CaptureThread::run()
     QThread::sleep(8);
     emit howToUseInfo();
 
+    // time between frames and offset because of image processing
+    int intervalOffset = 40; //ms
+    int frameInterval = gestureDuration / Utilities::FRAMES_PER_SEQUENCE - intervalOffset;
+
     while (*running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
 
         // frame used to predict the gesture
         if (recording) {
-            recordGesture(tmpFrame);
+            // makes the gesture duration deterministic
+            if (getIntervalElapsedTime() > frameInterval) {
+                recordGesture(tmpFrame);
+                startIntervalTimer();
+            }
         }
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
 
