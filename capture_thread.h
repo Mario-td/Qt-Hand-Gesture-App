@@ -16,10 +16,6 @@ public:
     {
         recording = record;
     };
-//    void setDisplaying(bool display)
-//    {
-//        displaying = display;
-//    };
     std::shared_ptr<bool> getRunning() const
     {
         return running;

@@ -69,7 +69,7 @@ void PredictGestureThread::passThroughGestureModel()
     // signal with the predicted gesture
     emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
 
-    QThread::sleep(4);
+    QThread::sleep(6);
 
     gestureClassificationModelInput.clear();
 

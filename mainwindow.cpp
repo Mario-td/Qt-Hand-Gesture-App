@@ -22,8 +22,8 @@ void MainWindow::initUI()
 
     // setup area for the text of the predicted gesture
     predictionText = new QLabel(this);
-    QFont predictionTextFont("Sans serif", 35, QFont::Bold);
-    predictionText->setText("Hi! Give me some commands with your hand");
+    QFont predictionTextFont("Sans serif", 40, QFont::Bold);
+    predictionText->setText("Hi! Give me commands with your hand");
     predictionText->setFont(predictionTextFont);
     predictionText->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(predictionText, 0, 0, 1, 5);
@@ -39,12 +39,14 @@ void MainWindow::initUI()
     imageScene->addPixmap(*robotImage)->setPos(0, 10);
 
     bulbImage = new QPixmap (dirImages.path() + "/bulb.png");
-    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
+//    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
     imageScene->setSceneRect(robotImage->rect());
 
     // setup area for the record button
     recordButton = new QPushButton(this);
+    QFont recordButtonFont("Serif", 15, QFont::Bold);
     recordButton->setText("Record");
+    recordButton->setFont(recordButtonFont);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
     connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
@@ -55,6 +57,8 @@ void MainWindow::initUI()
     nameFilters << "*.gif";
     QFileInfoList files = dirImages.entryInfoList(
                               nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
+    QFont gestureNameFont("Sans Serif", 15, QFont::Bold);
+
     // populates the gif list
     for (int i = 0, n = files.size(); i < n; ++i) {
         gifList->append(new QLabel());
@@ -73,6 +77,7 @@ void MainWindow::initUI()
         QString name = files[i].baseName();
         QLabel *gestureName = new QLabel(this);
         gestureName->setText(name);
+        gestureName->setFont(gestureNameFont);
         gestureName->setAlignment(Qt::AlignHCenter);
         mainLayout->addWidget(gestureName, 12, i, Qt::AlignHCenter);
     }
@@ -104,7 +109,6 @@ void MainWindow::displayCamera()
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
     connect(capturer, &CaptureThread::cameraReady, this, &MainWindow::askForUserCommands);
     connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
-    capturer->start();
 
     // creates a predict gesture thread object and connects the signals to the mainwindow slots
     classifier = new PredictGestureThread(capturer->getRunning(), capturer->getPredictingFrames(),
@@ -117,6 +121,9 @@ void MainWindow::displayCamera()
     // connects capturer and classifier for restarting a prediction
     connect(classifier, &PredictGestureThread::resetPrediction, capturer,
             &CaptureThread::setDisplaying);
+
+    // runs both threads
+    capturer->start();
     classifier->start();
 }
 
