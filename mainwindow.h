@@ -40,6 +40,7 @@ private slots:
     void updateWindowWhileRecording();
     void updateWindowAfterRecording();
     void updateWindowAfterPredicting(const char *gestureName);
+    void setRecordButtonVisible();
     void askForUserCommands();
     void giveUserInstructions();
 

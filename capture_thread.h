@@ -16,6 +16,10 @@ public:
     {
         recording = record;
     };
+//    void setDisplaying(bool display)
+//    {
+//        displaying = display;
+//    };
     std::shared_ptr<bool> getRunning() const
     {
         return running;
@@ -35,6 +39,12 @@ private:
 protected:
     void run() override;
 
+public slots:
+    void setDisplaying(const bool &display)
+    {
+        displaying = display;
+    };
+
 signals:
     void cameraReady();
     void howToUseInfo();
@@ -44,6 +54,7 @@ signals:
 private:
     std::shared_ptr<bool> running;
     bool recording;
+    bool displaying;
     int cameraID;
     QMutex *displayedDataLock;
     cv::Mat frame;

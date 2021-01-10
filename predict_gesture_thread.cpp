@@ -66,8 +66,12 @@ void PredictGestureThread::passThroughGestureModel()
     gestureClassificationModelInput.push_back(gestureSequenceTensor);
     auto output = gestureClassificationModel.forward(gestureClassificationModelInput).toTensor();
 
-    // set button visibility after the prediction
+    // signal with the predicted gesture
     emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
 
+    QThread::sleep(4);
+
     gestureClassificationModelInput.clear();
+
+    emit resetPrediction(true);
 }

@@ -24,6 +24,7 @@ protected:
 
 signals:
     void finishedPrediction(const char *);
+    void resetPrediction(bool);
 
 private:
 

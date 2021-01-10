@@ -38,8 +38,8 @@ void MainWindow::initUI()
     robotImage = new QPixmap(dirImages.path() + "/robot.png");
     imageScene->addPixmap(*robotImage)->setPos(0, 10);
 
-    QPixmap bulbImage (dirImages.path() + "/bulb.png");
-    imageScene->addPixmap(bulbImage)->setPos(140, -40);
+    bulbImage = new QPixmap (dirImages.path() + "/bulb.png");
+    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
     imageScene->setSceneRect(robotImage->rect());
 
     // setup area for the record button
@@ -111,6 +111,12 @@ void MainWindow::displayCamera()
                                           capturer->getPredictingDataLock());
     connect(classifier, &PredictGestureThread::finishedPrediction, this,
             &MainWindow::updateWindowAfterPredicting);
+    connect(classifier, &PredictGestureThread::resetPrediction, this,
+            &MainWindow::setRecordButtonVisible);
+
+    // connects capturer and classifier for restarting a prediction
+    connect(classifier, &PredictGestureThread::resetPrediction, capturer,
+            &CaptureThread::setDisplaying);
     classifier->start();
 }
 
@@ -170,12 +176,29 @@ void MainWindow::updateWindowWhileRecording()
 
 void MainWindow::updateWindowAfterRecording()
 {
-    predictionText->setText(QString("You can stop"));
+    imageScene->clear();
+    imageView->resetMatrix();
+    imageScene->addPixmap(*robotImage)->setPos(0, 10);
+    imageScene->update();
+    imageView->setSceneRect(robotImage->rect());
+
+    predictionText->setText(QString("Let me think..."));
 }
 
 void MainWindow::updateWindowAfterPredicting(const char *gestureName)
 {
-    predictionText->setText(QString("You performed ")
-                            + QString(gestureName));
+    imageScene->clear();
+    imageView->resetMatrix();
+    imageScene->addPixmap(*robotImage)->setPos(0, 10);
+    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
+    imageScene->update();
+    imageView->setSceneRect(robotImage->rect());
+
+    predictionText->setText(QString("You made ")
+                            + QString(gestureName) + QString("!"));
+}
+
+void MainWindow::setRecordButtonVisible()
+{
     recordButton->setVisible(true);
 }
