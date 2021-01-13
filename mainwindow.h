@@ -10,6 +10,7 @@
 #include <QGraphicsView>
 #include <QPushButton>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsProxyWidget>
 #include <QKeyEvent>
 #include <QList>
 #include <QMovie>
@@ -28,9 +29,10 @@ public:
 
 private:
     void initUI();
-    void appIntro();
+    void appStartup();
     void displayCamera();
-    void populateGestureVector();
+    void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
+                  const QString &path, const int &PosX, const int &PosY);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -51,13 +53,34 @@ private:
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
 
-    QPixmap *robotImage;
-    QPixmap *bulbImage;
+    QDir dirImages;
+
+    struct SceneGif {
+        QLabel *label;
+        QMovie *movie;
+        QGraphicsItem *graphics;
+        QGraphicsProxyWidget *graphicsProxy;
+        SceneGif()
+        {
+            label = new QLabel();
+            movie = new QMovie(label);
+            graphics = new QGraphicsRectItem();
+            graphicsProxy = new QGraphicsProxyWidget(graphics);
+            qDebug() << "created";
+        }
+        ~SceneGif()
+        {
+            qDebug() << "destroyed";
+        }
+    };
+
+    SceneGif *robotGif;
+    SceneGif *actionGif;
 
     QPushButton *recordButton;
 
-    QList<QMovie *> *gifMovieList;
-    QList<QLabel *> *gifList;
+    QList<QMovie *> *gestureGifMovieList;
+    QList<QLabel *> *gestureGifList;
 
     cv::Mat currentFrame;
 

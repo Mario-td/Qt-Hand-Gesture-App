@@ -1,16 +1,34 @@
 ﻿#include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
-    , capturer(nullptr)
+    QMainWindow(parent), dirImages("./images"), capturer(nullptr), classifier(nullptr)
 {
     initUI();
     displayedDataLock = new QMutex();
-    appIntro();
+    appStartup();
 }
 
 MainWindow::~MainWindow()
 {
+    delete predictionText;
+
+    delete imageScene;
+    delete imageView;
+
+    delete robotGif;
+    delete actionGif;
+
+    delete recordButton;
+
+    for (auto &gestureGifMovie : *gestureGifMovieList) {
+        delete gestureGifMovie;
+    }
+    delete gestureGifMovieList;
+
+    for (auto &gestureGif : *gestureGifList) {
+        delete gestureGif;
+    }
+    delete gestureGifList;
 }
 
 void MainWindow::initUI()
@@ -31,14 +49,12 @@ void MainWindow::initUI()
     imageView = new QGraphicsView(imageScene);
     mainLayout->addWidget(imageView, 1, 0, 9, 5);
 
-    // setup the robot image
-    QDir dirImages("./images");
-    robotImage = new QPixmap(dirImages.path() + "/robot.png");
-    imageScene->addPixmap(*robotImage)->setPos(0, 10);
-
-    bulbImage = new QPixmap (dirImages.path() + "/bulb.png");
-//    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
-    imageScene->setSceneRect(robotImage->rect());
+    // setup the scene gifs
+    actionGif = new SceneGif();
+    robotGif = new SceneGif();
+    setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
+             dirImages.path() + "/robot.gif", 0, 20);
+    imageScene->addItem(robotGif->graphicsProxy);
 
     // setup area for the record button
     recordButton = new QPushButton(this);
@@ -49,27 +65,27 @@ void MainWindow::initUI()
     connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
     // setup area for the gesture gif list
-    gifList = new QList<QLabel *>;
-    gifMovieList = new QList<QMovie *>;
+    gestureGifList = new QList<QLabel *>;
+    gestureGifMovieList = new QList<QMovie *>;
     QStringList nameFilters;
     nameFilters << "*.gif";
-    QFileInfoList files = dirImages.entryInfoList(
+    QFileInfoList files = QDir(dirImages.path() + "/gestures/").entryInfoList(
                               nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
     QFont gestureNameFont("Sans Serif", 15, QFont::Bold);
 
-    // populates the gif list
+    // populates the gesture gif list
     for (int i = 0, n = files.size(); i < n; ++i) {
-        gifList->append(new QLabel());
-        gifMovieList->append(new QMovie(gifList->back()));
-        gifMovieList->back()->setFileName(files[i].filePath());
-        gifList->back()->setMovie(gifMovieList->back());
+        gestureGifList->append(new QLabel());
+        gestureGifMovieList->append(new QMovie(gestureGifList->back()));
+        gestureGifMovieList->back()->setFileName(files[i].filePath());
+        gestureGifList->back()->setMovie(gestureGifMovieList->back());
 
         // gets the size of the gif to resize it
-        gifMovieList->back()->jumpToFrame(0);
-        QSize gifSize = gifMovieList->back()->currentImage().size();
-        gifMovieList->back()->setScaledSize(gifSize * 0.65);
-        gifMovieList->back()->start();
-        mainLayout->addWidget(gifList->back(), 11, i, Qt::AlignHCenter);
+        gestureGifMovieList->back()->jumpToFrame(0);
+        QSize gifSize = gestureGifMovieList->back()->currentImage().size();
+        gestureGifMovieList->back()->setScaledSize(gifSize * 0.65);
+        gestureGifMovieList->back()->start();
+        mainLayout->addWidget(gestureGifList->back(), 11, i, Qt::AlignHCenter);
 
         // setup the name of the gestures
         QString name = files[i].baseName();
@@ -85,7 +101,7 @@ void MainWindow::initUI()
     setCentralWidget(widget);
 }
 
-void MainWindow::appIntro()
+void MainWindow::appStartup()
 {
     // keeps the widget space after making it invisible
     QSizePolicy retainButtonSpace = recordButton->sizePolicy();
@@ -123,6 +139,17 @@ void MainWindow::displayCamera()
     // runs both threads
     capturer->start();
     classifier->start();
+}
+
+void MainWindow::setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
+                          const QString &path, const int &PosX, const int &PosY)
+{
+    movieGif->setFileName(path);
+    movieGif->start();
+    gif->setAttribute( Qt::WA_NoSystemBackground );
+    gif->setMovie(movieGif);
+    graphicsProxyGif->setWidget(gif);
+    graphicsProxyGif->setPos(PosX, PosY);
 }
 
 void MainWindow::askForUserCommands()
@@ -183,22 +210,33 @@ void MainWindow::updateWindowWhileRecording()
 void MainWindow::updateWindowAfterRecording()
 {
     imageScene->clear();
-    imageView->resetMatrix();
-    imageScene->addPixmap(*robotImage)->setPos(0, 10);
+    delete robotGif;
+    delete actionGif;
+    robotGif = new SceneGif();
+    actionGif = new SceneGif();
+    setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
+             dirImages.path() + "/robot.gif", 0, 20);
+    setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
+             dirImages.path() + "/waiting.gif", 210, 0);
+    qDebug() << imageScene->items();
+    imageScene->addItem(robotGif->graphicsProxy);
+    imageScene->addItem(actionGif->graphicsProxy);
+    imageView->setSceneRect(robotGif->label->rect());
     imageScene->update();
-    imageView->setSceneRect(robotImage->rect());
 
     predictionText->setText(QString("Let me think..."));
 }
 
 void MainWindow::updateWindowAfterPredicting(const char *gestureName)
 {
-    imageScene->clear();
-    imageView->resetMatrix();
-    imageScene->addPixmap(*robotImage)->setPos(0, 10);
-    imageScene->addPixmap(*bulbImage)->setPos(140, -40);
+    imageScene->removeItem(actionGif->graphicsProxy);
+    delete actionGif;
+    actionGif = new SceneGif();
+    setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
+             dirImages.path() + "/bulb.gif", 210, -10);
+    qDebug() << imageScene->items();
+    imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
-    imageView->setSceneRect(robotImage->rect());
 
     predictionText->setText(QString("You made ")
                             + QString(gestureName) + QString("!"));
