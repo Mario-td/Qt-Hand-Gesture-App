@@ -58,7 +58,7 @@ void MainWindow::initUI()
 
     // setup area for the record button
     recordButton = new QPushButton(this);
-    QFont recordButtonFont("Serif", 15, QFont::Bold);
+    QFont recordButtonFont("Serif", 13, QFont::Bold);
     recordButton->setText("Record");
     recordButton->setFont(recordButtonFont);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
@@ -121,7 +121,7 @@ void MainWindow::displayCamera()
     // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
-    connect(capturer, &CaptureThread::cameraReady, this, &MainWindow::askForUserCommands);
+    connect(capturer, &CaptureThread::hiMessage, this, &MainWindow::askForUserCommands);
     connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
 
     // creates a predict gesture thread object and connects the signals to the mainwindow slots

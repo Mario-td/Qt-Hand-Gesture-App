@@ -30,10 +30,7 @@ void CaptureThread::run()
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
 
-    QThread::sleep(6);
-    emit cameraReady();
-    QThread::sleep(8);
-    emit howToUseInfo();
+    introUI();
 
     // time between frames and offset because of image processing
     int intervalOffset = 40; //ms
@@ -80,4 +77,12 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
         setDisplaying(false);
         sequenceFrameIdx = 0;
     }
+}
+
+void CaptureThread::introUI()
+{
+    QThread::sleep(6);
+    emit hiMessage();
+    QThread::sleep(8);
+    emit howToUseInfo();
 }

@@ -33,6 +33,7 @@ public:
 
 private:
     void recordGesture(const cv::Mat &frame);
+    void introUI();
 
 protected:
     void run() override;
@@ -44,7 +45,7 @@ public slots:
     };
 
 signals:
-    void cameraReady();
+    void hiMessage();
     void howToUseInfo();
     void frameCaptured(cv::Mat *data);
     void finishedRecording();
