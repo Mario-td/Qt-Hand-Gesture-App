@@ -196,6 +196,7 @@ void MainWindow::updateFrame(cv::Mat *mat)
 
 void MainWindow::updateWindowWhileRecording()
 {
+    // DELETE GIF POINTERS HERE?
     capturer->startIntervalTimer();
     capturer->setRecording(true);
     predictionText->setText("");
@@ -218,7 +219,6 @@ void MainWindow::updateWindowAfterRecording()
              dirImages.path() + "/robot.gif", 0, 20);
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
              dirImages.path() + "/waiting.gif", 210, 0);
-    qDebug() << imageScene->items();
     imageScene->addItem(robotGif->graphicsProxy);
     imageScene->addItem(actionGif->graphicsProxy);
     imageView->setSceneRect(robotGif->label->rect());
@@ -234,9 +234,13 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     actionGif = new SceneGif();
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
              dirImages.path() + "/bulb.gif", 210, -10);
-    qDebug() << imageScene->items();
     imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
+
+    blurEffect = new QGraphicsBlurEffect();
+    blurEffect->setBlurRadius(5);
+    blurEffect->setEnabled(true);
+    gestureGifList->at(3)->setGraphicsEffect(blurEffect);
 
     predictionText->setText(QString("You made ")
                             + QString(gestureName) + QString("!"));
