@@ -13,6 +13,7 @@
 #include <QGraphicsProxyWidget>
 #include <QKeyEvent>
 #include <QList>
+#include <QGraphicsBlurEffect>
 #include <QMovie>
 #include <QStatusBar>
 #include <QLabel>
@@ -25,17 +26,16 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
 
 private:
     void initUI();
-    void appStartup();
+    void keepButtonSpace();
     void displayCamera();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void updateFrame(cv::Mat *);
@@ -66,11 +66,6 @@ private:
             movie = new QMovie(label);
             graphics = new QGraphicsRectItem();
             graphicsProxy = new QGraphicsProxyWidget(graphics);
-            qDebug() << "created";
-        }
-        ~SceneGif()
-        {
-            qDebug() << "destroyed";
         }
     };
 
@@ -81,6 +76,9 @@ private:
 
     QList<QMovie *> *gestureGifMovieList;
     QList<QLabel *> *gestureGifList;
+
+    // GESTURE LIST STYLE TRIAL
+    QGraphicsBlurEffect *blurEffect;
 
     cv::Mat currentFrame;
 

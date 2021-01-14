@@ -5,30 +5,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     initUI();
     displayedDataLock = new QMutex();
-    appStartup();
-}
-
-MainWindow::~MainWindow()
-{
-    delete predictionText;
-
-    delete imageScene;
-    delete imageView;
-
-    delete robotGif;
-    delete actionGif;
-
-    delete recordButton;
-
-    for (auto &gestureGifMovie : *gestureGifMovieList) {
-        delete gestureGifMovie;
-    }
-    delete gestureGifMovieList;
-
-    for (auto &gestureGif : *gestureGifList) {
-        delete gestureGif;
-    }
-    delete gestureGifList;
+    keepButtonSpace();
+    displayCamera();
 }
 
 void MainWindow::initUI()
@@ -99,17 +77,6 @@ void MainWindow::initUI()
     QWidget *widget = new QWidget(this);
     widget->setLayout(mainLayout);
     setCentralWidget(widget);
-}
-
-void MainWindow::appStartup()
-{
-    // keeps the widget space after making it invisible
-    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
-    retainButtonSpace.setRetainSizeWhenHidden(true);
-    recordButton->setSizePolicy(retainButtonSpace);
-    recordButton->setVisible(false);
-
-    displayCamera();
 }
 
 void MainWindow::displayCamera()
@@ -200,11 +167,7 @@ void MainWindow::updateWindowWhileRecording()
     capturer->setRecording(true);
     predictionText->setText("");
 
-    // keeps the widget space after making it invisible
-    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
-    retainButtonSpace.setRetainSizeWhenHidden(true);
-    recordButton->setSizePolicy(retainButtonSpace);
-    recordButton->setVisible(false);
+    keepButtonSpace();
 }
 
 void MainWindow::updateWindowAfterRecording()
@@ -218,7 +181,6 @@ void MainWindow::updateWindowAfterRecording()
              dirImages.path() + "/robot.gif", 0, 20);
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
              dirImages.path() + "/waiting.gif", 210, 0);
-    qDebug() << imageScene->items();
     imageScene->addItem(robotGif->graphicsProxy);
     imageScene->addItem(actionGif->graphicsProxy);
     imageView->setSceneRect(robotGif->label->rect());
@@ -234,9 +196,13 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     actionGif = new SceneGif();
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
              dirImages.path() + "/bulb.gif", 210, -10);
-    qDebug() << imageScene->items();
     imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
+
+    blurEffect = new QGraphicsBlurEffect();
+    blurEffect->setBlurRadius(5);
+    blurEffect->setEnabled(true);
+    gestureGifList->at(3)->setGraphicsEffect(blurEffect);
 
     predictionText->setText(QString("You made ")
                             + QString(gestureName) + QString("!"));
@@ -245,4 +211,13 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
 void MainWindow::setRecordButtonVisible()
 {
     recordButton->setVisible(true);
+}
+
+// keeps the widget space after making it invisible
+void MainWindow::keepButtonSpace()
+{
+    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
+    retainButtonSpace.setRetainSizeWhenHidden(true);
+    recordButton->setSizePolicy(retainButtonSpace);
+    recordButton->setVisible(false);
 }
