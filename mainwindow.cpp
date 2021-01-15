@@ -163,6 +163,7 @@ void MainWindow::updateFrame(cv::Mat *mat)
 
 void MainWindow::updateWindowWhileRecording()
 {
+    // DELETE GIF POINTERS HERE?
     capturer->startIntervalTimer();
     capturer->setRecording(true);
     predictionText->setText("");
