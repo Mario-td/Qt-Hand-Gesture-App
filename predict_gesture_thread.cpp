@@ -11,20 +11,18 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
 
 void PredictGestureThread::run()
 {
-    qDebug("predicting thread");
-
     while (*running) {
 
         // if it is not extracting keypoints from a frame then dequeue the next frame if it's available
         if (!extractingKeypoints) {
-            DequeueSequenceFrame();
+            dequeueSequenceFrame();
         } else {
-            ExtractKeypoints();
+            extractKeypoints();
         }
     }
 }
 
-void PredictGestureThread::DequeueSequenceFrame()
+void PredictGestureThread::dequeueSequenceFrame()
 {
     // Dequeues a frame if the buffer is not empty
     predictingDataLock->lock();
@@ -36,7 +34,7 @@ void PredictGestureThread::DequeueSequenceFrame()
     predictingDataLock->unlock();
 }
 
-void PredictGestureThread::ExtractKeypoints()
+void PredictGestureThread::extractKeypoints()
 {
     // Declares a vector to store the handkeypoint locations and performs the inference for each frame
     std::vector<std::map<float, cv::Point2f>> handKeypoints;

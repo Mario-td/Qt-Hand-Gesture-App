@@ -45,6 +45,9 @@ void MainWindow::initUI()
     // setup area for the gesture gif list
     gestureGifList = new QList<QLabel *>;
     gestureGifMovieList = new QList<QMovie *>;
+    gestureNameList = new QList<QLabel *>;
+    opacityEffect = new QList<QGraphicsOpacityEffect *>;
+
     QStringList nameFilters;
     nameFilters << "*.gif";
     QFileInfoList files = QDir(dirImages.path() + "/gestures/").entryInfoList(
@@ -67,11 +70,17 @@ void MainWindow::initUI()
 
         // setup the name of the gestures
         QString name = files[i].baseName();
-        QLabel *gestureName = new QLabel(this);
-        gestureName->setText(name);
-        gestureName->setFont(gestureNameFont);
-        gestureName->setAlignment(Qt::AlignHCenter);
-        mainLayout->addWidget(gestureName, 12, i, Qt::AlignHCenter);
+        gestureNameList->append(new QLabel(this));
+        gestureNameList->back()->setText(name);
+        gestureNameList->back()->setFont(gestureNameFont);
+        gestureNameList->back()->setAlignment(Qt::AlignHCenter);
+        mainLayout->addWidget(gestureNameList->back(), 12, i, Qt::AlignHCenter);
+
+        // graphics effects for the gesture images
+        opacityEffect->append(new QGraphicsOpacityEffect());
+        opacityEffect->back()->setOpacity(0.4);
+        opacityEffect->back()->setEnabled(false);
+        gestureGifList->back()->setGraphicsEffect(opacityEffect->back());
     }
 
     QWidget *widget = new QWidget(this);
@@ -97,7 +106,7 @@ void MainWindow::displayCamera()
     connect(classifier, &PredictGestureThread::finishedPrediction, this,
             &MainWindow::updateWindowAfterPredicting);
     connect(classifier, &PredictGestureThread::resetPrediction, this,
-            &MainWindow::setRecordButtonVisible);
+            &MainWindow::resetUI);
 
     // connects capturer and classifier for restarting a prediction
     connect(classifier, &PredictGestureThread::resetPrediction, capturer,
@@ -163,7 +172,6 @@ void MainWindow::updateFrame(cv::Mat *mat)
 
 void MainWindow::updateWindowWhileRecording()
 {
-    // DELETE GIF POINTERS HERE?
     capturer->startIntervalTimer();
     capturer->setRecording(true);
     predictionText->setText("");
@@ -173,6 +181,7 @@ void MainWindow::updateWindowWhileRecording()
 
 void MainWindow::updateWindowAfterRecording()
 {
+    // clears the scene and add the gif items
     imageScene->clear();
     delete robotGif;
     delete actionGif;
@@ -192,6 +201,7 @@ void MainWindow::updateWindowAfterRecording()
 
 void MainWindow::updateWindowAfterPredicting(const char *gestureName)
 {
+    // substitutes the waiting gif for the bulb
     imageScene->removeItem(actionGif->graphicsProxy);
     delete actionGif;
     actionGif = new SceneGif();
@@ -200,17 +210,32 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
 
-    blurEffect = new QGraphicsBlurEffect();
-    blurEffect->setBlurRadius(5);
-    blurEffect->setEnabled(true);
-    gestureGifList->at(3)->setGraphicsEffect(blurEffect);
-
     predictionText->setText(QString("You made ")
                             + QString(gestureName) + QString("!"));
+
+    // update the gesture gif list
+    for (int i = 0, n = gestureNameList->size(); i < n; i++) {
+        if (gestureNameList->at(i)->text().size() != (int)strlen(gestureName)) {
+            opacityEffect->at(i)->setEnabled(true);
+            gestureNameList->at(i)->setHidden(true);
+            continue;
+        }
+        for (int j = 0, m = gestureNameList->at(i)->text().size(); j < m; j++) {
+            if (gestureNameList->at(i)->text().at(j) != gestureName[j]) {
+                opacityEffect->at(i)->setEnabled(true);
+                gestureNameList->at(i)->setHidden(true);
+            }
+        }
+    }
 }
 
-void MainWindow::setRecordButtonVisible()
+void MainWindow::resetUI()
 {
+    for (int i = 0, n = gestureNameList->size(); i < n; i++) {
+        opacityEffect->at(i)->setEnabled(false);
+        gestureNameList->at(i)->setHidden(false);
+    }
+    predictionText->setText("");
     recordButton->setVisible(true);
 }
 

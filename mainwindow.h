@@ -9,11 +9,11 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QPushButton>
-#include <QGraphicsPixmapItem>
+#include <QGraphicsRectItem>
 #include <QGraphicsProxyWidget>
 #include <QKeyEvent>
 #include <QList>
-#include <QGraphicsBlurEffect>
+#include <QGraphicsOpacityEffect>
 #include <QMovie>
 #include <QStatusBar>
 #include <QLabel>
@@ -42,7 +42,7 @@ private slots:
     void updateWindowWhileRecording();
     void updateWindowAfterRecording();
     void updateWindowAfterPredicting(const char *gestureName);
-    void setRecordButtonVisible();
+    void resetUI();
     void askForUserCommands();
     void giveUserInstructions();
 
@@ -76,9 +76,8 @@ private:
 
     QList<QMovie *> *gestureGifMovieList;
     QList<QLabel *> *gestureGifList;
-
-    // GESTURE LIST STYLE TRIAL
-    QGraphicsBlurEffect *blurEffect;
+    QList<QLabel *> *gestureNameList;
+    QList<QGraphicsOpacityEffect *> *opacityEffect;
 
     cv::Mat currentFrame;
 

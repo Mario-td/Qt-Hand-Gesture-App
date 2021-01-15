@@ -21,8 +21,6 @@ int CaptureThread::getIntervalElapsedTime() const
 
 void CaptureThread::run()
 {
-    qDebug("capturing thread");
-
     // get the camera ready
     cv::VideoCapture cap(cameraID);
     cv::Mat tmpFrame;
