@@ -79,8 +79,8 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 
 void CaptureThread::introUI()
 {
-    QThread::sleep(6);
+    QThread::sleep(5);
     emit hiMessage();
-    QThread::sleep(8);
+    QThread::sleep(6);
     emit howToUseInfo();
 }

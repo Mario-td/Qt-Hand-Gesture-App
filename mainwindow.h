@@ -8,12 +8,13 @@
 #include <QLineEdit>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QPushButton>
 #include <QGraphicsRectItem>
 #include <QGraphicsProxyWidget>
+#include <QGraphicsOpacityEffect>
+#include <QGraphicsDropShadowEffect>
+#include <QPushButton>
 #include <QKeyEvent>
 #include <QList>
-#include <QGraphicsOpacityEffect>
 #include <QMovie>
 #include <QStatusBar>
 #include <QLabel>
@@ -49,6 +50,7 @@ private slots:
 private:
     // UI elements
     QLabel *predictionText;
+    QGraphicsDropShadowEffect *predictionTextShadow;
 
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
@@ -73,11 +75,13 @@ private:
     SceneGif *actionGif;
 
     QPushButton *recordButton;
+    QGraphicsDropShadowEffect *buttonTextShadow;
 
     QList<QMovie *> *gestureGifMovieList;
     QList<QLabel *> *gestureGifList;
+    QList<QGraphicsOpacityEffect *> *gifOpacityEffect;
     QList<QLabel *> *gestureNameList;
-    QList<QGraphicsOpacityEffect *> *opacityEffect;
+    QList<QGraphicsDropShadowEffect *> *gestureNameTextShadow;
 
     cv::Mat currentFrame;
 

@@ -16,10 +16,16 @@ void MainWindow::initUI()
 
     // setup area for the text of the predicted gesture
     predictionText = new QLabel(this);
+    predictionTextShadow =  new QGraphicsDropShadowEffect();
+    predictionTextShadow->setXOffset(2);
+    predictionTextShadow->setYOffset(2);
+    predictionTextShadow->setBlurRadius(8);
+    predictionTextShadow->setColor(QColor(54, 100, 239, 200));
     QFont predictionTextFont("Sans serif", 40, QFont::Bold);
     predictionText->setText("Hi! Give me commands with your hand");
     predictionText->setFont(predictionTextFont);
     predictionText->setAlignment(Qt::AlignCenter);
+    predictionText->setGraphicsEffect(predictionTextShadow);
     mainLayout->addWidget(predictionText, 0, 0, 1, 5);
 
     // setup area for image display
@@ -36,9 +42,14 @@ void MainWindow::initUI()
 
     // setup area for the record button
     recordButton = new QPushButton(this);
+    buttonTextShadow = new QGraphicsDropShadowEffect();
+    buttonTextShadow->setXOffset(2);
+    buttonTextShadow->setYOffset(2);
+    buttonTextShadow->setColor(QColor(200, 0, 71, 200));
     QFont recordButtonFont("Serif", 13, QFont::Bold);
     recordButton->setText("Record");
     recordButton->setFont(recordButtonFont);
+    recordButton->setGraphicsEffect(buttonTextShadow);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
     connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
@@ -46,7 +57,8 @@ void MainWindow::initUI()
     gestureGifList = new QList<QLabel *>;
     gestureGifMovieList = new QList<QMovie *>;
     gestureNameList = new QList<QLabel *>;
-    opacityEffect = new QList<QGraphicsOpacityEffect *>;
+    gifOpacityEffect = new QList<QGraphicsOpacityEffect *>;
+    gestureNameTextShadow = new QList<QGraphicsDropShadowEffect *>;
 
     QStringList nameFilters;
     nameFilters << "*.gif";
@@ -76,11 +88,19 @@ void MainWindow::initUI()
         gestureNameList->back()->setAlignment(Qt::AlignHCenter);
         mainLayout->addWidget(gestureNameList->back(), 12, i, Qt::AlignHCenter);
 
-        // graphics effects for the gesture images
-        opacityEffect->append(new QGraphicsOpacityEffect());
-        opacityEffect->back()->setOpacity(0.4);
-        opacityEffect->back()->setEnabled(false);
-        gestureGifList->back()->setGraphicsEffect(opacityEffect->back());
+        // graphics effect for the gesture images
+        gifOpacityEffect->append(new QGraphicsOpacityEffect());
+        gifOpacityEffect->back()->setOpacity(0.4);
+        gifOpacityEffect->back()->setEnabled(false);
+        gestureGifList->back()->setGraphicsEffect(gifOpacityEffect->back());
+
+        // graphics effect for the gesture names
+        gestureNameTextShadow->append(new QGraphicsDropShadowEffect());
+        gestureNameTextShadow->back()->setXOffset(2);
+        gestureNameTextShadow->back()->setYOffset(2);
+        gestureNameTextShadow->back()->setBlurRadius(8);
+        gestureNameTextShadow->back()->setColor(QColor(102, 23, 231, 200));
+        gestureNameList->back()->setGraphicsEffect(gestureNameTextShadow->at(i));
     }
 
     QWidget *widget = new QWidget(this);
@@ -216,13 +236,13 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
     // update the gesture gif list
     for (int i = 0, n = gestureNameList->size(); i < n; i++) {
         if (gestureNameList->at(i)->text().size() != (int)strlen(gestureName)) {
-            opacityEffect->at(i)->setEnabled(true);
+            gifOpacityEffect->at(i)->setEnabled(true);
             gestureNameList->at(i)->setHidden(true);
             continue;
         }
         for (int j = 0, m = gestureNameList->at(i)->text().size(); j < m; j++) {
             if (gestureNameList->at(i)->text().at(j) != gestureName[j]) {
-                opacityEffect->at(i)->setEnabled(true);
+                gifOpacityEffect->at(i)->setEnabled(true);
                 gestureNameList->at(i)->setHidden(true);
             }
         }
@@ -232,10 +252,10 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
 void MainWindow::resetUI()
 {
     for (int i = 0, n = gestureNameList->size(); i < n; i++) {
-        opacityEffect->at(i)->setEnabled(false);
+        gifOpacityEffect->at(i)->setEnabled(false);
         gestureNameList->at(i)->setHidden(false);
     }
-    predictionText->setText("");
+    predictionText->setText("Try again");
     recordButton->setVisible(true);
 }
 
