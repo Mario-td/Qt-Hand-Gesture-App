@@ -69,13 +69,18 @@ private:
             graphics = new QGraphicsRectItem();
             graphicsProxy = new QGraphicsProxyWidget(graphics);
         }
+        ~SceneGif()
+        {
+            delete label;
+            delete graphics;
+        }
     };
 
     SceneGif *robotGif;
     SceneGif *actionGif;
 
     QPushButton *recordButton;
-    QGraphicsDropShadowEffect *buttonTextShadow;
+    QGraphicsDropShadowEffect *buttonShadow;
 
     QList<QMovie *> *gestureGifMovieList;
     QList<QLabel *> *gestureGifList;

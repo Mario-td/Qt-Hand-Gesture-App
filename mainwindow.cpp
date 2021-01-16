@@ -1,7 +1,8 @@
 ﻿#include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), dirImages("./images"), capturer(nullptr), classifier(nullptr)
+    QMainWindow(parent), dirImages("./images"), capturer(nullptr),
+    classifier(nullptr)
 {
     initUI();
     displayedDataLock = new QMutex();
@@ -42,14 +43,14 @@ void MainWindow::initUI()
 
     // setup area for the record button
     recordButton = new QPushButton(this);
-    buttonTextShadow = new QGraphicsDropShadowEffect();
-    buttonTextShadow->setXOffset(2);
-    buttonTextShadow->setYOffset(2);
-    buttonTextShadow->setColor(QColor(200, 0, 71, 200));
+    buttonShadow = new QGraphicsDropShadowEffect();
+    buttonShadow->setXOffset(2);
+    buttonShadow->setYOffset(2);
+    buttonShadow->setColor(QColor(200, 0, 71, 200));
     QFont recordButtonFont("Serif", 13, QFont::Bold);
     recordButton->setText("Record");
     recordButton->setFont(recordButtonFont);
-    recordButton->setGraphicsEffect(buttonTextShadow);
+    recordButton->setGraphicsEffect(buttonShadow);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
     connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
@@ -148,6 +149,14 @@ void MainWindow::setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *g
     graphicsProxyGif->setPos(PosX, PosY);
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Space && recordButton->isVisible())
+        updateWindowWhileRecording();
+    else if (event->key() == Qt::Key_Escape)
+        this->close();
+}
+
 void MainWindow::askForUserCommands()
 {
     predictionText->setText("make some of the gestures listed below");
@@ -155,16 +164,10 @@ void MainWindow::askForUserCommands()
 
 void MainWindow::giveUserInstructions()
 {
+    delete robotGif;
+    delete actionGif;
     predictionText->setText("click \"Record\" or press spacebar and start");
     recordButton->setVisible(true);
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Space && recordButton->isVisible())
-        updateWindowWhileRecording();
-    else if (event->key() == Qt::Key_Escape)
-        this->close();
 }
 
 void MainWindow::updateFrame(cv::Mat *mat)
@@ -201,10 +204,8 @@ void MainWindow::updateWindowWhileRecording()
 
 void MainWindow::updateWindowAfterRecording()
 {
-    // clears the scene and add the gif items
+    // clears the scene and adds the gif items
     imageScene->clear();
-    delete robotGif;
-    delete actionGif;
     robotGif = new SceneGif();
     actionGif = new SceneGif();
     setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
@@ -255,6 +256,8 @@ void MainWindow::resetUI()
         gifOpacityEffect->at(i)->setEnabled(false);
         gestureNameList->at(i)->setHidden(false);
     }
+    delete actionGif;
+    delete robotGif;
     predictionText->setText("Try again");
     recordButton->setVisible(true);
 }

@@ -81,6 +81,6 @@ void CaptureThread::introUI()
 {
     QThread::sleep(5);
     emit hiMessage();
-    QThread::sleep(6);
+    QThread::sleep(5);
     emit howToUseInfo();
 }
