@@ -65,19 +65,19 @@
 
 <h3 id="build">Build</h3>
 
-<p>Clone this repository</p>
-<code>
-    git clone https://github.com/Mario-td/Qt-Hand-Gesture-App.git
-    <br>
-    cd Qt-Hand-Gesture-App
-</code>
-<p>Build the executables</p>
-<code>
-    cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch .
-    <br>
-    make
-</code>
-<p>Run the application</p>
-<code>
-    ./Qt-Hand-Gesture-App
-</code>
+Clone this repository
+```shell
+git clone https://github.com/Mario-td/Qt-Hand-Gesture-App.git 
+cd Qt-Hand-Gesture-App
+```
+
+Build the executables
+```shell
+cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch .
+make
+```
+
+Run the application
+```shell
+./Qt-Hand-Gesture-App
+```
