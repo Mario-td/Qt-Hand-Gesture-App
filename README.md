@@ -4,7 +4,7 @@
 <h1 align="center">Qt Hand Gesture App</h1>
 <p align="center">An application for hand gesture classification</p>
 <p align="center">
-    <a href="">Watch Demo</a>
+    <a href="https://www.youtube.com/watch?fbclid=IwAR3mIMSDKiGlsY23Tmc96Ih72cW03VPU0ePLkMbh1jnjijmjytIwJfibA4I&v=H1PUaA6VzWk&feature=youtu.bek">Watch Demo</a>
     ·
 <a href="https://github.com/Mario-td/Qt-Hand-Gesture-App/issues">Request Feature</a>
     ·
@@ -27,7 +27,7 @@
             </ul>
         </li>
         <li><a href="#references">References</a></li>
-        <li><a href="#licence">License</a></li>
+        <li><a href="#license">License</a></li>
     </ol>
 </details>
 
@@ -35,7 +35,7 @@
 
 <br>
 <div align="center">
-    <a href="google.com"><img src="images/Hand Gesture App Screenshot.png" style="width: 75vw"></a>
+    <a href="https://www.youtube.com/watch?fbclid=IwAR3mIMSDKiGlsY23Tmc96Ih72cW03VPU0ePLkMbh1jnjijmjytIwJfibA4I&v=H1PUaA6VzWk&feature=youtu.be"><img src="images/Hand Gesture App Screenshot.png" style="width: 75vw"></a>
 </div>
 <br>
 <p>This project is created to record a user's gesture with one hand and figure out which gesture was performed.</p> 
@@ -46,7 +46,7 @@
     <li>Data cleaning and data augmentation applying spatio-temporal transformations</li>
     <li>Training and fine-tunning a deep neural network model from scratch using the 2D hand keypoint location data, covered <a href="https://github.com/Mario-td/Hand-Gesture-Classification-with-Tensorflow-2.0">here</a></li> 
     <li>Building a program to record the gestures and perform the inference, also covered <a href="https://github.com/Mario-td/Inference-for-Hand-Gesture-Classification">here</a></li>
-    <li>Creating a user-friendly GUI </li>
+    <li>Creating a user-friendly GUI using multithreading programming</li>
 </ul>
 
 <h3 id="technologies">Technologies</h3>
@@ -81,3 +81,11 @@ Run the application
 ```shell
 ./Qt-Hand-Gesture-App
 ```
+<h2 id="references">References</h2>
+<ul>
+    <li>Y. Wang, B. Zhang, C. Peng,"SRHandNet: Real-Time 2D Hand Pose EstimationWith Simultaneous Region Localization", IEEE, Transactions on Image Processing,Volume 29, Pages 2977 - 2986, DOI:10.1109/TIP.2019.2955280, 2019.</li>
+</ul>
+
+<h2 id="license">License</h2>
+
+<p>Distributed under the MIT License. See <code>LICENSE</code> for more information.</p>
