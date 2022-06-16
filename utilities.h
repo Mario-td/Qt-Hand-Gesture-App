@@ -11,6 +11,8 @@ public:
     static constexpr int TRAIN_IMAGE_WIDTH = 256;
     static constexpr double LABEL_MIN = 0.2;
     static constexpr int NUMBER_GESTURES = 5;
+    static constexpr int FRAME_WIDTH = 640;
+    static constexpr int FRAME_HEIGHT = 480;
 
     // Number of frames per sequence and number of keypoints detected in each frame
     static constexpr unsigned short FRAMES_PER_SEQUENCE = 32;

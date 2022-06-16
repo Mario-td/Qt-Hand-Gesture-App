@@ -25,8 +25,8 @@ void CaptureThread::run()
     cv::VideoCapture cap(cameraID);
     cv::Mat tmpFrame;
 
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
 
     introUI();
 

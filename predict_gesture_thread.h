@@ -2,6 +2,9 @@
 #define PREDICT_GESTURE_THREAD_H
 
 #include "utilities.h"
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/sync/named_semaphore.hpp>
 
 #include <QThread>
 #include <QMutex>

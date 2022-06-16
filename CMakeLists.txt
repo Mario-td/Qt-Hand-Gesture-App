@@ -16,9 +16,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Torch REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(${TORCH_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories (${Boost_INCLUDE_DIR})
 
 link_directories(${OpenCV_LIB_DIR})
 link_directories(${TORCH_LIBRARIES})
@@ -38,6 +40,8 @@ add_executable(Qt-Hand-Gesture-App
 target_link_libraries(Qt-Hand-Gesture-App PRIVATE Qt5::Widgets
     ${TORCH_LIBRARIES}
     ${OpenCV_LIBS}
+    ${Boost_LIBRARIES}
+    librt.so
     )
 
 set_property(TARGET Qt-Hand-Gesture-App PROPERTY CXX_STANDARD 17)
