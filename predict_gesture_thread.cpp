@@ -10,24 +10,26 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
     shared_memory_object::remove("MySharedMemory");
     shared_memory_object shm(create_only, "MySharedMemory", read_write);
 
-    shared_memory_object *shm2 = new shared_memory_object(create_only, "MySharedMemory2", read_write);
-
     // Set size
     shm.truncate(imageSizeBytes * Utilities::FRAMES_PER_SEQUENCE);
 
     // Map the whole shared memory in this process
-    mapped_region region(shm, read_write);
+    region = new mapped_region(shm, read_write);
 
-    void *region_address = region.get_address();
-    std::memset(region_address, 0, region.get_size());
+    void *region_address = region->get_address();
+    std::memset(region_address, 0, region->get_size());
 
-    imageBuff = static_cast<uchar *>(region_address);
     coordinatesBuff = static_cast<float *>(region_address);
+    imageBuff = static_cast<uchar *>(region_address);
 
     named_semaphore::remove("Semaphore");
-    named_semaphore semaphore(create_only_t(), "Semaphore", 0);
+    semaphore = new named_semaphore (create_only_t(), "Semaphore", 0);
 
-    qDebug("Seems to work\n");
+    thrd = new std::thread ([]() {
+        std::string
+        s("~/mediapipe/bazel-bin/hand_tracking/hand_tracking_gpu hand_tracking_desktop_live_gpu.pbtxt");
+        std::system(s.c_str());
+    });
 
     handKeypointModel = torch::jit::script::Module(torch::jit::load("./hand.pts", torch::kCUDA));
     gestureClassificationModel = torch::jit::script::Module(torch::jit::load("./model.pt"));
@@ -72,7 +74,24 @@ void PredictGestureThread::extractKeypoints()
     // set to cero after completing a sequence
     if (sequenceIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
         sequenceIdx = 0;
+        qDebug("Here");
         passThroughGestureModel();
+        thrd->join();
+        qDebug("Here2f");
+        for (int i = 0; i < Utilities::FRAMES_PER_SEQUENCE; ++i) {
+            for (int j = 0; j < Utilities::NUM_KEYPOINTS * 2; j += 2) {
+                std::cout << "\nLandmark " << j / 2 << ":" << std::endl;
+                std::cout << "\tx:" << coordinatesBuff[i * Utilities::NUM_KEYPOINTS * 2 + j] << std::endl;
+                std::cout << "\ty:" << coordinatesBuff[i * Utilities::NUM_KEYPOINTS * 2 + j + 1] << std::endl;
+            }
+        }
+
+        delete thrd;
+        thrd = new std::thread ([]() {
+            std::string
+            s("~/mediapipe/bazel-bin/hand_tracking/hand_tracking_gpu hand_tracking_desktop_live_gpu.pbtxt");
+            std::system(s.c_str());
+        });
     }
 }
 
@@ -97,7 +116,8 @@ void PredictGestureThread::putFrameInSharedMemory()
     predictingDataLock->lock();
     if (!predictingFrames->empty()) {
         recordedFrame = predictingFrames->front();
-        //memcpy(&imageBuff[sequenceIdx * imageSizeBytes], recordedFrame.data, imageSizeBytes);
+        std::memcpy(&imageBuff[sequenceIdx * imageSizeBytes], recordedFrame.data, imageSizeBytes);
+        semaphore->post();
         predictingFrames->dequeue();
         predictingDataLock->unlock();
         extractKeypoints();

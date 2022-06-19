@@ -45,8 +45,11 @@ private:
     int sequenceIdx;
 
     static constexpr size_t imageSizeBytes = Utilities::FRAME_WIDTH * Utilities::FRAME_HEIGHT * 3;
+    boost::interprocess::mapped_region *region;
     uchar *imageBuff = nullptr;
     float *coordinatesBuff = nullptr;
+    std::thread *thrd;
+    boost::interprocess::named_semaphore *semaphore;
 
     std::vector<torch::jit::IValue> gestureClassificationModelInput;
     torch::Tensor gestureSequenceTensor = torch::zeros({1, Utilities::NUM_KEYPOINTS * 2, Utilities::FRAMES_PER_SEQUENCE});
