@@ -21,6 +21,7 @@ private:
     void extractKeypoints();
     void dequeueSequenceFrame();
     void passThroughGestureModel();
+    void putFrameInSharedMemory();
 
 protected:
     void run() override;
@@ -42,6 +43,10 @@ private:
     bool extractingKeypoints;
     cv::Mat recordedFrame;
     int sequenceIdx;
+
+    static constexpr size_t imageSizeBytes = Utilities::FRAME_WIDTH * Utilities::FRAME_HEIGHT * 3;
+    uchar *imageBuff = nullptr;
+    float *coordinatesBuff = nullptr;
 
     std::vector<torch::jit::IValue> gestureClassificationModelInput;
     torch::Tensor gestureSequenceTensor = torch::zeros({1, Utilities::NUM_KEYPOINTS * 2, Utilities::FRAMES_PER_SEQUENCE});

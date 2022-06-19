@@ -6,27 +6,23 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
     sequenceIdx(0)
 {
     using namespace boost::interprocess;
-    // Remove shared memory on construction and destruction
-    struct shm_remove {
-        shm_remove()
-        {
-            shared_memory_object::remove("MySharedMemory");
-        }
-        ~shm_remove()
-        {
-            shared_memory_object::remove("MySharedMemory");
-        }
-    } remover;
-
     // Create a shared memory object.
+    shared_memory_object::remove("MySharedMemory");
     shared_memory_object shm(create_only, "MySharedMemory", read_write);
 
+    shared_memory_object *shm2 = new shared_memory_object(create_only, "MySharedMemory2", read_write);
+
     // Set size
-    size_t image_size_bytes = Utilities::FRAME_WIDTH * Utilities::FRAME_HEIGHT * 3;
-    shm.truncate(image_size_bytes * Utilities::FRAMES_PER_SEQUENCE);
+    shm.truncate(imageSizeBytes * Utilities::FRAMES_PER_SEQUENCE);
 
     // Map the whole shared memory in this process
     mapped_region region(shm, read_write);
+
+    void *region_address = region.get_address();
+    std::memset(region_address, 0, region.get_size());
+
+    imageBuff = static_cast<uchar *>(region_address);
+    coordinatesBuff = static_cast<float *>(region_address);
 
     named_semaphore::remove("Semaphore");
     named_semaphore semaphore(create_only_t(), "Semaphore", 0);
@@ -40,13 +36,7 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
 void PredictGestureThread::run()
 {
     while (*running) {
-
-        // if it is not extracting keypoints from a frame then dequeue the next frame if it's available
-        if (!extractingKeypoints) {
-            dequeueSequenceFrame();
-        } else {
-            extractKeypoints();
-        }
+        putFrameInSharedMemory();
     }
 }
 
@@ -100,4 +90,19 @@ void PredictGestureThread::passThroughGestureModel()
     gestureClassificationModelInput.clear();
 
     emit resetPrediction(true);
+}
+
+void PredictGestureThread::putFrameInSharedMemory()
+{
+    predictingDataLock->lock();
+    if (!predictingFrames->empty()) {
+        recordedFrame = predictingFrames->front();
+        //memcpy(&imageBuff[sequenceIdx * imageSizeBytes], recordedFrame.data, imageSizeBytes);
+        predictingFrames->dequeue();
+        predictingDataLock->unlock();
+        extractKeypoints();
+    } else {
+        predictingDataLock->unlock();
+        return;
+    }
 }
