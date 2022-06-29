@@ -24,13 +24,19 @@ PredictGestureThread::PredictGestureThread(std::shared_ptr<bool> run, QQueue<cv:
 
     named_semaphore::remove("Semaphore");
     semaphore = new named_semaphore (create_only_t(), "Semaphore", 0);
+    /*
+        QString program =
+            "~/mediapipe/Simplified-hand-tracking-with-Mediapipe-CPP/run.sh";
 
+        QProcess *myProcess = new QProcess(this);
+        myProcess->start(program);
+    */
     thrd = new std::thread ([]() {
+        std::cout << "Launch process\n";
         std::string
-        s("~/mediapipe/bazel-bin/hand_tracking/hand_tracking_gpu hand_tracking_desktop_live_gpu.pbtxt");
+        s("~/mediapipe/Simplified-hand-tracking-with-Mediapipe-CPP/run.sh");
         std::system(s.c_str());
     });
-
     handKeypointModel = torch::jit::script::Module(torch::jit::load("./hand.pts", torch::kCUDA));
     gestureClassificationModel = torch::jit::script::Module(torch::jit::load("./model.pt"));
 }
@@ -89,7 +95,7 @@ void PredictGestureThread::extractKeypoints()
         delete thrd;
         thrd = new std::thread ([]() {
             std::string
-            s("~/mediapipe/bazel-bin/hand_tracking/hand_tracking_gpu hand_tracking_desktop_live_gpu.pbtxt");
+            s("GLOG_logtostderr=1 ~/mediapipe/bazel-bin/Simplified-hand-tracking-with-Mediapipe-CPP/hand_tracking_gpu");
             std::system(s.c_str());
         });
     }

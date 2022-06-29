@@ -14,6 +14,7 @@ public:
     CaptureThread(int camera, QMutex *lock);
     void setRecording(bool record)
     {
+        startIntervalTimer();
         recording = record;
     };
     std::shared_ptr<bool> getRunning() const
@@ -33,7 +34,6 @@ public:
 
 private:
     void recordGesture(const cv::Mat &frame);
-    void introUI();
 
 protected:
     void run() override;
@@ -55,7 +55,7 @@ private:
     bool recording;
     bool displaying;
     int cameraID;
-    QMutex *displayedDataLock;
+    QMutex *displayFrameLock;
     cv::Mat frame;
     int gestureDuration;
     QElapsedTimer frameIntervalTimer;
@@ -64,6 +64,7 @@ private:
     PredictGestureThread *predictor;
     QMutex *predictingDataLock;
     QQueue<cv::Mat> *predictingFrames;
+    QVector<cv::Mat> gestureSequenceFrames = QVector<cv::Mat>(Utilities::FRAMES_PER_SEQUENCE);
 };
 
 #endif // CAPTURETHREAD_H

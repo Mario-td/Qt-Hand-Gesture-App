@@ -1,16 +1,16 @@
 ﻿#include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), dirImages("./images"), capturer(nullptr),
-    classifier(nullptr)
+    QMainWindow(parent), dirImages("./images"), displayFrameLock(new QMutex())
 {
-    initUI();
-    displayedDataLock = new QMutex();
-    keepButtonSpace();
-    displayCamera();
+    initializeUIComponents();
+    initializeCamera();
+
+    QTimer::singleShot(5000, this, &MainWindow::giveUserInstructions);
+    QTimer::singleShot(10000, this, &MainWindow::askToPressButton);
 }
 
-void MainWindow::initUI()
+void MainWindow::initializeUIComponents()
 {
     // setup a grid layout
     QGridLayout *mainLayout = new QGridLayout();
@@ -51,8 +51,12 @@ void MainWindow::initUI()
     recordButton->setText("Record");
     recordButton->setFont(recordButtonFont);
     recordButton->setGraphicsEffect(buttonShadow);
+    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
+    retainButtonSpace.setRetainSizeWhenHidden(true);
+    recordButton->setSizePolicy(retainButtonSpace);
+    recordButton->setVisible(false);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
-    connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
+    //connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
 
     // setup area for the gesture gif list
     gestureGifList = new QList<QLabel *>;
@@ -109,19 +113,20 @@ void MainWindow::initUI()
     setCentralWidget(widget);
 }
 
-void MainWindow::displayCamera()
+void MainWindow::initializeCamera()
 {
     // set the used camera ID
     int camID = 0;
-    capturer = new CaptureThread(camID, displayedDataLock);
+    capturer = new CaptureThread(camID, displayFrameLock);
 
     // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
-    connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
-    connect(capturer, &CaptureThread::hiMessage, this, &MainWindow::askForUserCommands);
-    connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
+    //connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
+    //connect(capturer, &CaptureThread::hiMessage, this, &MainWindow::askForUserCommands);
+    //connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
 
     // creates a predict gesture thread object and connects the signals to the mainwindow slots
+    /*
     classifier = new PredictGestureThread(capturer->getRunning(), capturer->getPredictingFrames(),
                                           capturer->getPredictingDataLock());
     connect(classifier, &PredictGestureThread::finishedPrediction, this,
@@ -132,10 +137,11 @@ void MainWindow::displayCamera()
     // connects capturer and classifier for restarting a prediction
     connect(classifier, &PredictGestureThread::resetPrediction, capturer,
             &CaptureThread::setDisplaying);
+    */
 
     // runs both threads
     capturer->start();
-    classifier->start();
+    //classifier->start();
 }
 
 void MainWindow::setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
@@ -152,18 +158,19 @@ void MainWindow::setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *g
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Space && recordButton->isVisible())
-        updateWindowWhileRecording();
+        startRecording();
     else if (event->key() == Qt::Key_Escape)
         this->close();
 }
 
-void MainWindow::askForUserCommands()
+void MainWindow::giveUserInstructions()
 {
     predictionText->setText("make some of the gestures listed below");
 }
 
-void MainWindow::giveUserInstructions()
+void MainWindow::askToPressButton()
 {
+    capturer->setDisplaying(true);
     delete robotGif;
     delete actionGif;
     predictionText->setText("click \"Record\" or press spacebar and start");
@@ -172,9 +179,9 @@ void MainWindow::giveUserInstructions()
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    displayedDataLock->lock();
+    displayFrameLock->lock();
     currentFrame = *mat;
-    displayedDataLock->unlock();
+    displayFrameLock->unlock();
 
     cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
@@ -193,13 +200,12 @@ void MainWindow::updateFrame(cv::Mat *mat)
     imageView->setSceneRect(image.rect());
 }
 
-void MainWindow::updateWindowWhileRecording()
+void MainWindow::startRecording()
 {
-    capturer->startIntervalTimer();
     capturer->setRecording(true);
-    predictionText->setText("");
 
-    keepButtonSpace();
+    predictionText->setText("");
+    recordButton->setVisible(false);
 }
 
 void MainWindow::updateWindowAfterRecording()

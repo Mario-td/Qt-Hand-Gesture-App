@@ -10,6 +10,7 @@
 #include <QMutex>
 #include <QQueue>
 #include <QDebug>
+#include <QProcess>
 
 class PredictGestureThread : public QThread
 {

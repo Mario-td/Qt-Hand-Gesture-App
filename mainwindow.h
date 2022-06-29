@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QAction>
 #include <QDir>
+#include <QTimer>
 
 class MainWindow : public QMainWindow
 {
@@ -29,9 +30,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
 private:
-    void initUI();
+    void initializeUIComponents();
     void keepButtonSpace();
-    void displayCamera();
+    void initializeCamera();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);
 
@@ -40,11 +41,11 @@ protected:
 
 private slots:
     void updateFrame(cv::Mat *);
-    void updateWindowWhileRecording();
+    void startRecording();
     void updateWindowAfterRecording();
     void updateWindowAfterPredicting(const char *gestureName);
     void resetUI();
-    void askForUserCommands();
+    void askToPressButton();
     void giveUserInstructions();
 
 private:
@@ -91,7 +92,7 @@ private:
     cv::Mat currentFrame;
 
     // for capture thread
-    QMutex *displayedDataLock;
+    QMutex *displayFrameLock;
     CaptureThread *capturer;
 
     // for predicting thread

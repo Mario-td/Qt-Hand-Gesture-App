@@ -1,7 +1,8 @@
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(int camera, QMutex *lock):
-    recording(false), displaying(true), cameraID(camera), displayedDataLock(lock)
+    recording(false), displaying(false), cameraID(camera),
+    displayFrameLock(lock)
 {
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
@@ -22,13 +23,11 @@ int CaptureThread::getIntervalElapsedTime() const
 void CaptureThread::run()
 {
     // get the camera ready
-    cv::VideoCapture cap(cameraID);
+    cv::VideoCapture cap(cv::CAP_V4L2);
     cv::Mat tmpFrame;
 
     cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
-
-    introUI();
 
     // time between frames and offset because of image processing
     int intervalOffset = 40; //ms
@@ -50,9 +49,9 @@ void CaptureThread::run()
 
         // frame used to display in the UI
         if (displaying) {
-            displayedDataLock->lock();
+            displayFrameLock->lock();
             frame = tmpFrame;
-            displayedDataLock->unlock();
+            displayFrameLock->unlock();
             emit frameCaptured(&frame);
         }
     }
@@ -63,6 +62,7 @@ void CaptureThread::run()
 void CaptureThread::recordGesture(const cv::Mat &frame)
 {
     static int sequenceFrameIdx = 0;
+    gestureSequenceFrames[sequenceFrameIdx] = frame.clone();
     predictingDataLock->lock();
     predictingFrames->enqueue(frame.clone());
     predictingDataLock->unlock();
@@ -75,12 +75,4 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
         setDisplaying(false);
         sequenceFrameIdx = 0;
     }
-}
-
-void CaptureThread::introUI()
-{
-    QThread::sleep(5);
-    emit hiMessage();
-    QThread::sleep(5);
-    emit howToUseInfo();
 }
