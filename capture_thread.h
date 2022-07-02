@@ -2,6 +2,8 @@
 #define CAPTURETHREAD_H
 
 #include "predict_gesture_thread.h"
+#include "timer.h"
+#include "utilities.h"
 
 #include "opencv2/videoio.hpp"
 
@@ -16,6 +18,7 @@ public:
     {
         startIntervalTimer();
         recording = record;
+        timer.start();
     };
     std::shared_ptr<bool> getRunning() const
     {
@@ -56,9 +59,10 @@ private:
     bool displaying;
     int cameraID;
     QMutex *displayFrameLock;
-    cv::Mat frame;
     int gestureDuration;
     QElapsedTimer frameIntervalTimer;
+    Timer timer = Timer(5000, 32);
+    cv::Mat frame;
 
     // for predicting thread
     PredictGestureThread *predictor;

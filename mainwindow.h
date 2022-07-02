@@ -31,7 +31,6 @@ public:
 
 private:
     void initializeUIComponents();
-    void keepButtonSpace();
     void initializeCamera();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);

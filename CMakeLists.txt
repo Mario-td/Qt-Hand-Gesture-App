@@ -35,6 +35,8 @@ add_executable(Qt-Hand-Gesture-App
     capture_thread.h
     predict_gesture_thread.cpp
     predict_gesture_thread.h
+    timer.h
+    timer.cpp
     )
 
 target_link_libraries(Qt-Hand-Gesture-App PRIVATE Qt5::Widgets

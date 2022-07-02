@@ -267,12 +267,3 @@ void MainWindow::resetUI()
     predictionText->setText("Try again");
     recordButton->setVisible(true);
 }
-
-// keeps the widget space after making it invisible
-void MainWindow::keepButtonSpace()
-{
-    QSizePolicy retainButtonSpace = recordButton->sizePolicy();
-    retainButtonSpace.setRetainSizeWhenHidden(true);
-    recordButton->setSizePolicy(retainButtonSpace);
-    recordButton->setVisible(false);
-}

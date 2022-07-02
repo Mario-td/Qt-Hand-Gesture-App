@@ -40,10 +40,14 @@ void CaptureThread::run()
         // frame used to predict the gesture
         if (recording) {
             // makes the gesture duration deterministic
-            if (getIntervalElapsedTime() > frameInterval) {
+            if (timer.readyForNextInterval()) {
                 recordGesture(tmpFrame);
-                startIntervalTimer();
+                timer.nextInterval();
+                std::cout << timer.elapsedTimer.elapsed() << std::endl;
             }
+            /*if (getIntervalElapsedTime() > frameInterval) {
+                startIntervalTimer();
+            }*/
         }
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
 
