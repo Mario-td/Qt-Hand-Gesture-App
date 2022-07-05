@@ -42,7 +42,7 @@ private slots:
     void updateFrame(cv::Mat *);
     void startRecording();
     void updateWindowAfterRecording();
-    void updateWindowAfterPredicting(const char *gestureName);
+    void updateWindowAfterPredicting(int ii);
     void resetUI();
     void askToPressButton();
     void giveUserInstructions();
@@ -96,5 +96,6 @@ private:
 
     // for predicting thread
     PredictGestureThread *classifier;
+    bool displaying = false;
 };
 #endif // MAINWINDOW_H

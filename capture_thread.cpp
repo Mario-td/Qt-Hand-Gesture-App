@@ -29,36 +29,28 @@ void CaptureThread::run()
     cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
 
-    // time between frames and offset because of image processing
-    int intervalOffset = 40; //ms
-    int frameInterval = gestureDuration / Utilities::FRAMES_PER_SEQUENCE - intervalOffset;
-
     while (*running) {
         cap >> tmpFrame;
         if (tmpFrame.empty()) break;
 
-        // frame used to predict the gesture
         if (recording) {
-            // makes the gesture duration deterministic
             if (timer.readyForNextInterval()) {
                 recordGesture(tmpFrame);
                 timer.nextInterval();
                 std::cout << timer.elapsedTimer.elapsed() << std::endl;
             }
-            /*if (getIntervalElapsedTime() > frameInterval) {
-                startIntervalTimer();
-            }*/
         }
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
 
         // frame used to display in the UI
-        if (displaying) {
+        if (true) { //displaying
             displayFrameLock->lock();
             frame = tmpFrame;
             displayFrameLock->unlock();
             emit frameCaptured(&frame);
         }
     }
+
     cap.release();
     *running = false;
 }

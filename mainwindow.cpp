@@ -121,7 +121,9 @@ void MainWindow::initializeCamera()
 
     // creates a capture thread object and connects the signals to the mainwindow slots
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
-    //connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
+    connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
+    connect(&(capturer->worker), &WorkerThread::resultReady, this,
+            &MainWindow::updateWindowAfterPredicting);
     //connect(capturer, &CaptureThread::hiMessage, this, &MainWindow::askForUserCommands);
     //connect(capturer, &CaptureThread::howToUseInfo, this, &MainWindow::giveUserInstructions);
 
@@ -170,34 +172,39 @@ void MainWindow::giveUserInstructions()
 
 void MainWindow::askToPressButton()
 {
+    displaying = true;
     capturer->setDisplaying(true);
-    delete robotGif;
-    delete actionGif;
+    robotGif->graphics->hide();
+    actionGif->graphics->hide();
+    //delete robotGif;
+    //delete actionGif;
     predictionText->setText("click \"Record\" or press spacebar and start");
     recordButton->setVisible(true);
 }
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    displayFrameLock->lock();
-    currentFrame = *mat;
-    displayFrameLock->unlock();
+    if (displaying) {
+        displayFrameLock->lock();
+        currentFrame = *mat;
+        displayFrameLock->unlock();
 
-    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
+        cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
-    QImage frame(
-        currentFrame.data,
-        currentFrame.cols,
-        currentFrame.rows,
-        currentFrame.step,
-        QImage::Format_RGB888);
-    QPixmap image = QPixmap::fromImage(frame);
+        QImage frame(
+            currentFrame.data,
+            currentFrame.cols,
+            currentFrame.rows,
+            currentFrame.step,
+            QImage::Format_RGB888);
+        QPixmap image = QPixmap::fromImage(frame);
 
-    imageScene->clear();
-    imageView->resetMatrix();
-    imageScene->addPixmap(image);
-    imageScene->update();
-    imageView->setSceneRect(image.rect());
+        imageScene->clear();
+        imageView->resetMatrix();
+        imageScene->addPixmap(image);
+        imageScene->update();
+        imageView->setSceneRect(image.rect());
+    }
 }
 
 void MainWindow::startRecording()
@@ -211,8 +218,10 @@ void MainWindow::startRecording()
 void MainWindow::updateWindowAfterRecording()
 {
     // clears the scene and adds the gif items
+    displaying = false;
     imageScene->clear();
     robotGif = new SceneGif();
+    robotGif->graphics->show();
     actionGif = new SceneGif();
     setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
              dirImages.path() + "/robot.gif", 0, 20);
@@ -226,9 +235,10 @@ void MainWindow::updateWindowAfterRecording()
     predictionText->setText(QString("Let me think..."));
 }
 
-void MainWindow::updateWindowAfterPredicting(const char *gestureName)
+void MainWindow::updateWindowAfterPredicting(int ii)//
 {
     // substitutes the waiting gif for the bulb
+    /*
     imageScene->removeItem(actionGif->graphicsProxy);
     delete actionGif;
     actionGif = new SceneGif();
@@ -254,6 +264,14 @@ void MainWindow::updateWindowAfterPredicting(const char *gestureName)
             }
         }
     }
+    */
+    for (int i = 0, n = gestureNameList->size(); i < n; i++) {
+        if (i != ii) {
+            gifOpacityEffect->at(i)->setEnabled(true);
+            gestureNameList->at(i)->setHidden(true);
+        }
+    }
+    QTimer::singleShot(3000, this, &MainWindow::resetUI);
 }
 
 void MainWindow::resetUI()
@@ -264,6 +282,7 @@ void MainWindow::resetUI()
     }
     delete actionGif;
     delete robotGif;
+    displaying = true;
     predictionText->setText("Try again");
     recordButton->setVisible(true);
 }

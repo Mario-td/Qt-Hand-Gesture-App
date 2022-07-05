@@ -9,6 +9,21 @@
 
 #include <QElapsedTimer>
 
+class WorkerThread : public QThread
+{
+    Q_OBJECT
+    void run() override
+    {
+        int result = 2;
+        QThread::sleep(10);
+        emit resultReady(result);
+    }
+public:
+signals:
+    void resultReady(const int &i);
+};
+
+
 class CaptureThread : public QThread
 {
     Q_OBJECT
@@ -18,6 +33,7 @@ public:
     {
         startIntervalTimer();
         recording = record;
+        worker.start();
         timer.start();
     };
     std::shared_ptr<bool> getRunning() const
@@ -34,6 +50,7 @@ public:
     };
     void startIntervalTimer();
     int getIntervalElapsedTime() const;
+    WorkerThread worker;
 
 private:
     void recordGesture(const cv::Mat &frame);
