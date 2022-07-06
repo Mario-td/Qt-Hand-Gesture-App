@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "capture_thread.h"
+#include "resources.h"
 
 #include <QMainWindow>
 #include <QGridLayout>
@@ -21,6 +22,9 @@
 #include <QAction>
 #include <QDir>
 #include <QTimer>
+
+constexpr int camID = 0;
+
 
 class MainWindow : public QMainWindow
 {
@@ -49,13 +53,11 @@ private slots:
 
 private:
     // UI elements
-    QLabel *predictionText;
-    QGraphicsDropShadowEffect *predictionTextShadow;
+    QLabel *topText;
+    QGraphicsDropShadowEffect *topTextShadow;
 
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
-
-    QDir dirImages;
 
     struct SceneGif {
         QLabel *label;
@@ -80,7 +82,7 @@ private:
     SceneGif *actionGif;
 
     QPushButton *recordButton;
-    QGraphicsDropShadowEffect *buttonShadow;
+    QGraphicsDropShadowEffect *recordButtonShadow;
 
     QList<QMovie *> *gestureGifMovieList;
     QList<QLabel *> *gestureGifList;
@@ -91,7 +93,7 @@ private:
     cv::Mat currentFrame;
 
     // for capture thread
-    QMutex *displayFrameLock;
+    QMutex *displayFrameLock = new QMutex();
     CaptureThread *capturer;
 
     // for predicting thread

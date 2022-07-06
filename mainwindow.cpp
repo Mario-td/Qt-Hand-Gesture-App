@@ -1,7 +1,7 @@
 ﻿#include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), dirImages("./images"), displayFrameLock(new QMutex())
+    QMainWindow(parent)
 {
     initializeUIComponents();
     initializeCamera();
@@ -12,53 +12,52 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::initializeUIComponents()
 {
-    // setup a grid layout
     QGridLayout *mainLayout = new QGridLayout();
 
-    // setup area for the text of the predicted gesture
-    predictionText = new QLabel(this);
-    predictionTextShadow =  new QGraphicsDropShadowEffect();
-    predictionTextShadow->setXOffset(2);
-    predictionTextShadow->setYOffset(2);
-    predictionTextShadow->setBlurRadius(8);
-    predictionTextShadow->setColor(QColor(54, 100, 239, 200));
-    QFont predictionTextFont("Sans serif", 40, QFont::Bold);
-    predictionText->setText("Hi! Give me commands with your hand");
-    predictionText->setFont(predictionTextFont);
-    predictionText->setAlignment(Qt::AlignCenter);
-    predictionText->setGraphicsEffect(predictionTextShadow);
-    mainLayout->addWidget(predictionText, 0, 0, 1, 5);
+    // Main text
+    topText = new QLabel(this);
+    topTextShadow =  new QGraphicsDropShadowEffect();
+    topTextShadow->setXOffset(2);
+    topTextShadow->setYOffset(2);
+    topTextShadow->setBlurRadius(8);
+    topTextShadow->setColor(QColor(54, 100, 239, 200));
+    QFont topTextFont("Sans serif", 40, QFont::Bold);
+    topText->setText("Hi! Give me commands with your hand");
+    topText->setFont(topTextFont);
+    topText->setAlignment(Qt::AlignCenter);
+    topText->setGraphicsEffect(topTextShadow);
+    mainLayout->addWidget(topText, 0, 0, 1, 5);
 
-    // setup area for image display
+    // Image display
     imageScene = new QGraphicsScene(this);
     imageView = new QGraphicsView(imageScene);
     mainLayout->addWidget(imageView, 1, 0, 9, 5);
 
-    // setup the scene gifs
+    // Scene gifs
     actionGif = new SceneGif();
     robotGif = new SceneGif();
     setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
-             dirImages.path() + "/robot.gif", 0, 20);
+             ROBOT_GIF_PATH, 0, 20);
     imageScene->addItem(robotGif->graphicsProxy);
 
-    // setup area for the record button
+    // Record button
     recordButton = new QPushButton(this);
-    buttonShadow = new QGraphicsDropShadowEffect();
-    buttonShadow->setXOffset(2);
-    buttonShadow->setYOffset(2);
-    buttonShadow->setColor(QColor(200, 0, 71, 200));
+    recordButtonShadow = new QGraphicsDropShadowEffect();
+    recordButtonShadow->setXOffset(2);
+    recordButtonShadow->setYOffset(2);
+    recordButtonShadow->setColor(QColor(200, 0, 71, 200));
     QFont recordButtonFont("Serif", 13, QFont::Bold);
     recordButton->setText("Record");
     recordButton->setFont(recordButtonFont);
-    recordButton->setGraphicsEffect(buttonShadow);
+    recordButton->setGraphicsEffect(recordButtonShadow);
     QSizePolicy retainButtonSpace = recordButton->sizePolicy();
     retainButtonSpace.setRetainSizeWhenHidden(true);
     recordButton->setSizePolicy(retainButtonSpace);
     recordButton->setVisible(false);
     mainLayout->addWidget(recordButton, 10, 2, Qt::AlignHCenter);
-    //connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(updateWindowWhileRecording()));
+    connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(startRecording()));
 
-    // setup area for the gesture gif list
+    // Gestures gifs
     gestureGifList = new QList<QLabel *>;
     gestureGifMovieList = new QList<QMovie *>;
     gestureNameList = new QList<QLabel *>;
@@ -67,25 +66,25 @@ void MainWindow::initializeUIComponents()
 
     QStringList nameFilters;
     nameFilters << "*.gif";
-    QFileInfoList files = QDir(dirImages.path() + "/gestures/").entryInfoList(
+    QFileInfoList files = QDir(GESTURES_GIFS_PATH).entryInfoList(
                               nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
     QFont gestureNameFont("Sans Serif", 15, QFont::Bold);
 
-    // populates the gesture gif list
+    // Populates the gesture gif list
     for (int i = 0, n = files.size(); i < n; ++i) {
         gestureGifList->append(new QLabel());
         gestureGifMovieList->append(new QMovie(gestureGifList->back()));
         gestureGifMovieList->back()->setFileName(files[i].filePath());
         gestureGifList->back()->setMovie(gestureGifMovieList->back());
 
-        // gets the size of the gif to resize it
+        // Resize gestures gifs
         gestureGifMovieList->back()->jumpToFrame(0);
         QSize gifSize = gestureGifMovieList->back()->currentImage().size();
         gestureGifMovieList->back()->setScaledSize(gifSize * 0.65);
         gestureGifMovieList->back()->start();
         mainLayout->addWidget(gestureGifList->back(), 11, i, Qt::AlignHCenter);
 
-        // setup the name of the gestures
+        // Gestures names
         QString name = files[i].baseName();
         gestureNameList->append(new QLabel(this));
         gestureNameList->back()->setText(name);
@@ -93,13 +92,13 @@ void MainWindow::initializeUIComponents()
         gestureNameList->back()->setAlignment(Qt::AlignHCenter);
         mainLayout->addWidget(gestureNameList->back(), 12, i, Qt::AlignHCenter);
 
-        // graphics effect for the gesture images
+        // Graphics effects of the gestures images
         gifOpacityEffect->append(new QGraphicsOpacityEffect());
         gifOpacityEffect->back()->setOpacity(0.4);
         gifOpacityEffect->back()->setEnabled(false);
         gestureGifList->back()->setGraphicsEffect(gifOpacityEffect->back());
 
-        // graphics effect for the gesture names
+        // Graphics effects of the gesture names
         gestureNameTextShadow->append(new QGraphicsDropShadowEffect());
         gestureNameTextShadow->back()->setXOffset(2);
         gestureNameTextShadow->back()->setYOffset(2);
@@ -115,11 +114,9 @@ void MainWindow::initializeUIComponents()
 
 void MainWindow::initializeCamera()
 {
-    // set the used camera ID
-    int camID = 0;
     capturer = new CaptureThread(camID, displayFrameLock);
 
-    // creates a capture thread object and connects the signals to the mainwindow slots
+    // Signals and slots connections
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
     connect(&(capturer->worker), &WorkerThread::resultReady, this,
@@ -167,18 +164,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::giveUserInstructions()
 {
-    predictionText->setText("make some of the gestures listed below");
+    topText->setText("make some of the gestures listed below");
 }
 
 void MainWindow::askToPressButton()
 {
     displaying = true;
     capturer->setDisplaying(true);
-    robotGif->graphics->hide();
-    actionGif->graphics->hide();
-    //delete robotGif;
-    //delete actionGif;
-    predictionText->setText("click \"Record\" or press spacebar and start");
+    delete robotGif;
+    delete actionGif;
+    topText->setText("click \"Record\" or press spacebar and start");
     recordButton->setVisible(true);
 }
 
@@ -210,8 +205,7 @@ void MainWindow::updateFrame(cv::Mat *mat)
 void MainWindow::startRecording()
 {
     capturer->setRecording(true);
-
-    predictionText->setText("");
+    topText->setText("");
     recordButton->setVisible(false);
 }
 
@@ -224,15 +218,15 @@ void MainWindow::updateWindowAfterRecording()
     robotGif->graphics->show();
     actionGif = new SceneGif();
     setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
-             dirImages.path() + "/robot.gif", 0, 20);
+             ROBOT_GIF_PATH, 0, 20);
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
-             dirImages.path() + "/waiting.gif", 210, 0);
+             WAITING_GIF_PATH, 210, 0);
     imageScene->addItem(robotGif->graphicsProxy);
     imageScene->addItem(actionGif->graphicsProxy);
     imageView->setSceneRect(robotGif->label->rect());
     imageScene->update();
 
-    predictionText->setText(QString("Let me think..."));
+    topText->setText(QString("Let me think..."));
 }
 
 void MainWindow::updateWindowAfterPredicting(int ii)//
@@ -243,11 +237,11 @@ void MainWindow::updateWindowAfterPredicting(int ii)//
     delete actionGif;
     actionGif = new SceneGif();
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
-             dirImages.path() + "/bulb.gif", 210, -10);
+             imagesDir.path() + "/bulb.gif", 210, -10);
     imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
 
-    predictionText->setText(QString("You made ")
+    topText->setText(QString("You made ")
                             + QString(gestureName) + QString("!"));
 
     // update the gesture gif list
@@ -265,6 +259,14 @@ void MainWindow::updateWindowAfterPredicting(int ii)//
         }
     }
     */
+    imageScene->removeItem(actionGif->graphicsProxy);
+    delete actionGif;
+    actionGif = new SceneGif();
+    setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
+             BULB_GIF_PATH, 210, -10);
+    imageScene->addItem(actionGif->graphicsProxy);
+    imageScene->update();
+
     for (int i = 0, n = gestureNameList->size(); i < n; i++) {
         if (i != ii) {
             gifOpacityEffect->at(i)->setEnabled(true);
@@ -283,6 +285,6 @@ void MainWindow::resetUI()
     delete actionGif;
     delete robotGif;
     displaying = true;
-    predictionText->setText("Try again");
+    topText->setText("Try again");
     recordButton->setVisible(true);
 }
