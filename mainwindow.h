@@ -6,7 +6,6 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
-#include <QLineEdit>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
@@ -17,14 +16,17 @@
 #include <QKeyEvent>
 #include <QList>
 #include <QMovie>
-#include <QStatusBar>
 #include <QLabel>
-#include <QAction>
 #include <QDir>
 #include <QTimer>
 
-constexpr int camID = 0;
-
+#define CAM_ID 0
+#define INTRO_MSG "Hi! Give me commands with your hand"
+#define INSTRUCTIONS_MSG "make some of the gestures listed below"
+#define ASK_MSG "click \"Record\" or press spacebar and start"
+#define THINK_MSG "Let me think..."
+#define GUESSED_MSG "You made "
+#define TRY_AGAIN_MSG "Try again"
 
 class MainWindow : public QMainWindow
 {
@@ -33,31 +35,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
-private:
-    void initializeUIComponents();
-    void initializeCamera();
-    void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
-                  const QString &path, const int &PosX, const int &PosY);
-
 protected:
     void keyPressEvent(QKeyEvent *event);
 
-private slots:
-    void updateFrame(cv::Mat *);
-    void startRecording();
-    void updateWindowAfterRecording();
-    void updateWindowAfterPredicting(int ii);
-    void resetUI();
-    void askToPressButton();
-    void giveUserInstructions();
-
 private:
-    // UI elements
-    QLabel *topText;
-    QGraphicsDropShadowEffect *topTextShadow;
+    // GUI elements
+    QLabel *topText = new QLabel(this);;
+    QGraphicsDropShadowEffect *topTextShadow = new QGraphicsDropShadowEffect();;
 
-    QGraphicsScene *imageScene;
-    QGraphicsView *imageView;
+    QGraphicsScene *imageScene = new QGraphicsScene(this);
+    QGraphicsView *imageView = new QGraphicsView(imageScene);
 
     struct SceneGif {
         QLabel *label;
@@ -78,26 +65,36 @@ private:
         }
     };
 
-    SceneGif *robotGif;
-    SceneGif *actionGif;
+    SceneGif *robotGif = new SceneGif();
+    SceneGif *actionGif = new SceneGif();
 
-    QPushButton *recordButton;
-    QGraphicsDropShadowEffect *recordButtonShadow;
+    QPushButton *recordButton = new QPushButton(this);
+    QGraphicsDropShadowEffect *recordButtonShadow = new QGraphicsDropShadowEffect();
 
-    QList<QMovie *> *gestureGifMovieList;
-    QList<QLabel *> *gestureGifList;
-    QList<QGraphicsOpacityEffect *> *gifOpacityEffect;
-    QList<QLabel *> *gestureNameList;
-    QList<QGraphicsDropShadowEffect *> *gestureNameTextShadow;
+    QList<QLabel *> *gestureGifList = new QList<QLabel *>;
+    QList<QMovie *> *gestureGifMovieList = new QList<QMovie *>;
+    QList<QLabel *> *gestureNameList = new QList<QLabel *>;
+    QList<QGraphicsOpacityEffect *> *gifOpacityEffect = new QList<QGraphicsOpacityEffect *>;
+    QList<QGraphicsDropShadowEffect *> *gestureNameTextShadow = new QList<QGraphicsDropShadowEffect *>;
 
+    bool displaying = false;
+
+    QMutex *displayFrameLock = new QMutex();
+    CaptureThread *capturer = new CaptureThread(CAM_ID, displayFrameLock);
     cv::Mat currentFrame;
 
-    // for capture thread
-    QMutex *displayFrameLock = new QMutex();
-    CaptureThread *capturer;
+    void initializeUIComponents();
+    void initializeCamera();
+    void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
+                  const QString &path, const int &PosX, const int &PosY);
 
-    // for predicting thread
-    PredictGestureThread *classifier;
-    bool displaying = false;
+private slots:
+    void updateFrame(cv::Mat *);
+    void startRecording();
+    void updateWindowAfterRecording();
+    void updateWindowAfterPredicting(int ii);
+    void resetUI();
+    void askToPressButton();
+    void giveUserInstructions();
 };
 #endif // MAINWINDOW_H

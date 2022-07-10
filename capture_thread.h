@@ -15,6 +15,9 @@ class WorkerThread : public QThread
     void run() override
     {
         int result = 2;
+        std::string
+        s("~/mediapipe/Simplified-hand-tracking-with-Mediapipe-CPP/run.sh");
+        std::system(s.c_str());
         QThread::sleep(10);
         emit resultReady(result);
     }
