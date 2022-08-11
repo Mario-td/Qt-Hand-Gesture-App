@@ -4,7 +4,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     initializeUIComponents();
-    initializeCamera();
+    startCapturerThread();
 
     QTimer::singleShot(5000, this, &MainWindow::giveUserInstructions);
     QTimer::singleShot(10000, this, &MainWindow::askToPressButton);
@@ -98,7 +98,7 @@ void MainWindow::initializeUIComponents()
     setCentralWidget(widget);
 }
 
-void MainWindow::initializeCamera()
+void MainWindow::startCapturerThread()
 {
     // Signals and slots connections
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
@@ -135,7 +135,6 @@ void MainWindow::giveUserInstructions()
 
 void MainWindow::askToPressButton()
 {
-    displaying = true;
     capturer->setDisplaying(true);
     delete robotGif;
     delete actionGif;
@@ -145,27 +144,25 @@ void MainWindow::askToPressButton()
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    if (displaying) {
-        displayFrameLock->lock();
-        currentFrame = *mat;
-        displayFrameLock->unlock();
+    displayFrameLock->lock();
+    currentFrame = *mat;
+    displayFrameLock->unlock();
 
-        cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
+    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
-        QImage frame(
-            currentFrame.data,
-            currentFrame.cols,
-            currentFrame.rows,
-            currentFrame.step,
-            QImage::Format_RGB888);
-        QPixmap image = QPixmap::fromImage(frame);
+    QImage frame(
+        currentFrame.data,
+        currentFrame.cols,
+        currentFrame.rows,
+        currentFrame.step,
+        QImage::Format_RGB888);
+    QPixmap image = QPixmap::fromImage(frame);
 
-        imageScene->clear();
-        imageView->resetMatrix();
-        imageScene->addPixmap(image);
-        imageScene->update();
-        imageView->setSceneRect(image.rect());
-    }
+    imageScene->clear();
+    imageView->resetMatrix();
+    imageScene->addPixmap(image);
+    imageScene->update();
+    imageView->setSceneRect(image.rect());
 }
 
 void MainWindow::startRecording()
@@ -178,7 +175,6 @@ void MainWindow::startRecording()
 void MainWindow::updateWindowAfterRecording()
 {
     // Clears the scene and adds the gif items
-    displaying = false;
     imageScene->clear();
     robotGif = new SceneGif();
     robotGif->graphics->show();
@@ -220,13 +216,13 @@ void MainWindow::updateWindowAfterPredicting(int ii)//
 
 void MainWindow::resetUI()
 {
+    capturer->setDisplaying(true);
     for (int i = 0, n = gestureNameList->size(); i < n; i++) {
         gifOpacityEffect->at(i)->setEnabled(false);
         gestureNameList->at(i)->setHidden(false);
     }
     delete actionGif;
     delete robotGif;
-    displaying = true;
     topText->setText(TRY_AGAIN_MSG);
     recordButton->setVisible(true);
 }

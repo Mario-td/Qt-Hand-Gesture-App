@@ -7,7 +7,6 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
     predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
     running = std::make_shared<bool>(true);
-    gestureDuration = 5000; // ms
 }
 
 void CaptureThread::startIntervalTimer()
@@ -43,7 +42,7 @@ void CaptureThread::run()
         cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
 
         // frame used to display in the UI
-        if (true) { //displaying
+        if (displaying) {
             displayFrameLock->lock();
             frame = tmpFrame;
             displayFrameLock->unlock();

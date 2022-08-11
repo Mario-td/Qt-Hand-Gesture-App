@@ -77,14 +77,12 @@ private:
     QList<QGraphicsOpacityEffect *> *gifOpacityEffect = new QList<QGraphicsOpacityEffect *>;
     QList<QGraphicsDropShadowEffect *> *gestureNameTextShadow = new QList<QGraphicsDropShadowEffect *>;
 
-    bool displaying = false;
-
     QMutex *displayFrameLock = new QMutex();
     CaptureThread *capturer = new CaptureThread(CAM_ID, displayFrameLock);
     cv::Mat currentFrame;
 
     void initializeUIComponents();
-    void initializeCamera();
+    void startCapturerThread();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);
 

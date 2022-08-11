@@ -9,6 +9,8 @@
 
 #include <QElapsedTimer>
 
+#define GESTURE_DURATION 5000// in ms
+
 class WorkerThread : public QThread
 {
     Q_OBJECT
@@ -79,9 +81,8 @@ private:
     bool displaying;
     int cameraID;
     QMutex *displayFrameLock;
-    int gestureDuration;
     QElapsedTimer frameIntervalTimer;
-    Timer timer = Timer(5000, 32);
+    Timer timer = Timer(GESTURE_DURATION, 32);
     cv::Mat frame;
 
     // for predicting thread
