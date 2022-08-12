@@ -63,6 +63,9 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
     predictingDataLock->unlock();
     sequenceFrameIdx++;
 
+    if (sequenceFrameIdx == 1)
+        shMemoryWriter.writeFrameToMemory(frame, 0);
+
     // resets the variables when the sequence finishes
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
         emit finishedRecording();

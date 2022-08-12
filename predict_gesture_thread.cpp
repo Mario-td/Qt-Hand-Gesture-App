@@ -96,7 +96,7 @@ void PredictGestureThread::extractKeypoints()
         thrd = new std::thread ([]() {
             std::string
             s("GLOG_logtostderr=1 ~/mediapipe/bazel-bin/Simplified-hand-tracking-with-Mediapipe-CPP/hand_tracking_gpu");
-            std::system(s.c_str());
+            //std::system(s.c_str());
         });
     }
 }

@@ -36,6 +36,7 @@ add_executable(Qt-Hand-Gesture-App
     predict_gesture_thread.cpp
     predict_gesture_thread.h
     shared_memory_writer.h
+    shared_memory_writer.cpp
     timer.h
     timer.cpp
     resources.h

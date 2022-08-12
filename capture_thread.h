@@ -4,6 +4,7 @@
 #include "predict_gesture_thread.h"
 #include "timer.h"
 #include "utilities.h"
+#include "shared_memory_writer.h"
 
 #include "opencv2/videoio.hpp"
 
@@ -19,7 +20,7 @@ class WorkerThread : public QThread
         int result = 2;
         std::string
         s("~/mediapipe/Simplified-hand-tracking-with-Mediapipe-CPP/run.sh");
-        std::system(s.c_str());
+        //std::system(s.c_str());
         QThread::sleep(10);
         emit resultReady(result);
     }
@@ -55,6 +56,7 @@ public:
     };
     void startIntervalTimer();
     int getIntervalElapsedTime() const;
+    SharedMemoryWriter shMemoryWriter;
     WorkerThread worker;
 
 private:
