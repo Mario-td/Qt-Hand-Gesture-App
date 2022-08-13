@@ -10,6 +10,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(10000, this, &MainWindow::askToPressButton);
 }
 
+MainWindow::~MainWindow()
+{
+    capturer->exit();
+}
+
 void MainWindow::initializeUIComponents()
 {
     QGridLayout *mainLayout = new QGridLayout();
@@ -103,8 +108,7 @@ void MainWindow::startCapturerThread()
     // Signals and slots connections
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
-    connect(&(capturer->worker), &WorkerThread::resultReady, this,
-            &MainWindow::updateWindowAfterPredicting);
+    connect(capturer, &CaptureThread::resultReady, this, &MainWindow::updateWindowAfterPredicting);
 
     capturer->start();
 }
@@ -144,25 +148,28 @@ void MainWindow::askToPressButton()
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    displayFrameLock->lock();
-    currentFrame = *mat;
-    displayFrameLock->unlock();
+    if (capturer->getRunning()) {
 
-    cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
+        displayFrameLock->lock();
+        currentFrame = *mat;
+        displayFrameLock->unlock();
 
-    QImage frame(
-        currentFrame.data,
-        currentFrame.cols,
-        currentFrame.rows,
-        currentFrame.step,
-        QImage::Format_RGB888);
-    QPixmap image = QPixmap::fromImage(frame);
+        cv::resize(currentFrame, currentFrame, cv::Size(), 0.75, 0.75, cv::INTER_LINEAR);
 
-    imageScene->clear();
-    imageView->resetMatrix();
-    imageScene->addPixmap(image);
-    imageScene->update();
-    imageView->setSceneRect(image.rect());
+        QImage frame(
+            currentFrame.data,
+            currentFrame.cols,
+            currentFrame.rows,
+            currentFrame.step,
+            QImage::Format_RGB888);
+        QPixmap image = QPixmap::fromImage(frame);
+
+        imageScene->clear();
+        imageView->resetMatrix();
+        imageScene->addPixmap(image);
+        imageScene->update();
+        imageView->setSceneRect(image.rect());
+    }
 }
 
 void MainWindow::startRecording()
@@ -225,4 +232,10 @@ void MainWindow::resetUI()
     delete robotGif;
     topText->setText(TRY_AGAIN_MSG);
     recordButton->setVisible(true);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    capturer->exit();
+    capturer->~CaptureThread();
 }

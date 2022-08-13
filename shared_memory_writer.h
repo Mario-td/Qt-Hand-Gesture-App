@@ -13,20 +13,8 @@ class SharedMemoryWriter
 {
 
 public:
-    SharedMemoryWriter()
-    {
-        createNamedSemaphore();
-        allocateSharedMemory();
-    }
-
-    void writeFrameToMemory(const cv::Mat &frame, int index)
-    {
-        uchar *image_buff = static_cast<uchar *>(region->get_address());
-        memcpy(&image_buff[index * image_size_bytes], frame.data, image_size_bytes);
-        //cv::imshow("Child display window", frame);
-        //cv::waitKey(0);
-        semaphore->post();
-    }
+    SharedMemoryWriter();
+    void writeFrameToMemory(const cv::Mat &frame, int index);
 
 private:
     static constexpr size_t landmark_coordinates_bytes =
@@ -51,20 +39,8 @@ private:
     boost::interprocess::mapped_region *region;
     boost::interprocess::named_semaphore *semaphore;
 
-    void allocateSharedMemory()
-    {
-        shm.truncate(image_size_bytes * Utilities::FRAMES_PER_SEQUENCE);
-        region = new boost::interprocess::mapped_region(shm, boost::interprocess::read_write);
-        //void *region_address = region->get_address();
-        std::memset(region->get_address(), 0, region->get_size());
-    }
-
-    void createNamedSemaphore()
-    {
-        using namespace boost::interprocess;
-        named_semaphore::remove("Semaphore");
-        semaphore = new named_semaphore(create_only_t(), "Semaphore", 0);
-    }
+    void allocateSharedMemory();
+    void createNamedSemaphore();
 };
 
 #endif // SHARED_MEMORY_WRITER_H

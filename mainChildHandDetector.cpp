@@ -2,9 +2,9 @@
 
 #include "boost/interprocess/shared_memory_object.hpp"
 #include "boost/interprocess/mapped_region.hpp"
-#include <boost/interprocess/sync/named_semaphore.hpp>
+#include "boost/interprocess/sync/named_semaphore.hpp"
 
-#include "handlandmarks.h"
+#include "handlandmarksCPU.h"
 
 #define NUM_FRAMES 32
 #define FRAME_WIDTH 640
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 
 	named_semaphore semaphore(open_only_t(), "Semaphore");
 	
-	HandlandmarksDetector handlandmarksDetector("hand_tracking_desktop_live_gpu.pbtxt");
+	HandlandmarksDetectorCPU handlandmarksDetector("hand_tracking_desktop_live.pbtxt");
 	cv::Mat output_image;
 	
 	for (int i = 0; i < NUM_FRAMES; ++i)
@@ -48,16 +48,16 @@ int main(int argc, char** argv) {
 		// Write the landmark coordinates
 		memcpy(&coordinates_buff[i * NUM_LANDMARKS * 2], handlandmarksDetector.coordinates, landmark_coordinates_bytes);
 
-		/*for (int j = 0; j < NUM_LANDMARKS * 2; j+=2)
+		for (int j = 0; j < NUM_LANDMARKS * 2; j+=2)
 		{
-			std::cout << "\nLandmark " << j / 2 << ":" << std::endl;
+			std::cout << "\nWriter Landmark " << j / 2 << ":" << std::endl;
 			std::cout << "\tx:" << handlandmarksDetector.coordinates[j] << std::endl;
 			std::cout << "\ty:" << handlandmarksDetector.coordinates[j + 1] << std::endl;
 				std::cout << "\tx:" << coordinates_buff[i * NUM_LANDMARKS * 2 + j] << std::endl;
 				std::cout << "\ty:" << coordinates_buff[i * NUM_LANDMARKS * 2 + j + 1] << std::endl;
-		}*/
+		}
 		handlandmarksDetector.resetCoordinates();
-		//cv::imshow("Child display window", output_image);
+		//cv::imshow("Display window", output_image);
 		//cv::waitKey(0); 
 	}
 

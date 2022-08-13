@@ -4,9 +4,15 @@ CaptureThread::CaptureThread(int camera, QMutex *lock):
     recording(false), displaying(false), cameraID(camera),
     displayFrameLock(lock)
 {
-    predictingFrames = new QQueue<cv::Mat>();
     predictingDataLock = new QMutex();
     running = std::make_shared<bool>(true);
+}
+
+CaptureThread::~CaptureThread()
+{
+    worker.killHandDetectorProccess();
+    worker.exit();
+    cap->release();
 }
 
 void CaptureThread::startIntervalTimer()
@@ -22,15 +28,16 @@ int CaptureThread::getIntervalElapsedTime() const
 void CaptureThread::run()
 {
     // get the camera ready
-    cv::VideoCapture cap(cv::CAP_V4L2);
+    cap = new cv::VideoCapture(cv::CAP_V4L2);
     cv::Mat tmpFrame;
 
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
+    cap->set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
+    cap->set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
 
     while (*running) {
-        cap >> tmpFrame;
+        *cap >> tmpFrame;
         if (tmpFrame.empty()) break;
+        cv::flip(tmpFrame, tmpFrame, 1);
 
         if (recording) {
             if (timer.readyForNextInterval()) {
@@ -39,10 +46,10 @@ void CaptureThread::run()
                 std::cout << timer.elapsedTimer.elapsed() << std::endl;
             }
         }
-        cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
 
         // frame used to display in the UI
         if (displaying) {
+            cvtColor(tmpFrame, tmpFrame, cv::COLOR_BGR2RGB);
             displayFrameLock->lock();
             frame = tmpFrame;
             displayFrameLock->unlock();
@@ -50,27 +57,36 @@ void CaptureThread::run()
         }
     }
 
-    cap.release();
     *running = false;
 }
 
 void CaptureThread::recordGesture(const cv::Mat &frame)
 {
     static int sequenceFrameIdx = 0;
-    gestureSequenceFrames[sequenceFrameIdx] = frame.clone();
     predictingDataLock->lock();
-    predictingFrames->enqueue(frame.clone());
+    shMemoryWriter.writeFrameToMemory(frame, sequenceFrameIdx++);
     predictingDataLock->unlock();
-    sequenceFrameIdx++;
-
-    if (sequenceFrameIdx == 1)
-        shMemoryWriter.writeFrameToMemory(frame, 0);
 
     // resets the variables when the sequence finishes
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
-        emit finishedRecording();
-        setRecording(false);
-        setDisplaying(false);
+        predictGesture();
         sequenceFrameIdx = 0;
     }
 }
+
+void CaptureThread::predictGesture()
+{
+    emit finishedRecording();
+    while (!worker.isFinished());
+    emit resultReady(gesturePredictor.runModel()); ;
+    setRecording(false);
+    setDisplaying(false);
+}
+
+void CaptureThread::setRecording(bool record)
+{
+    startIntervalTimer();
+    recording = record;
+    worker.start();
+    timer.start();
+};

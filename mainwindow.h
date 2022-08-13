@@ -34,6 +34,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -85,6 +86,7 @@ private:
     void startCapturerThread();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void updateFrame(cv::Mat *);

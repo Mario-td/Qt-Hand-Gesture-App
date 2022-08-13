@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# list(APPEND CMAKE_PREFIX_PATH "~/libtorch")
+list(APPEND CMAKE_PREFIX_PATH "~/libtorch")
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Torch REQUIRED)
@@ -37,6 +37,11 @@ add_executable(Qt-Hand-Gesture-App
     predict_gesture_thread.h
     shared_memory_writer.h
     shared_memory_writer.cpp
+    shared_memory_reader.cpp
+    shared_memory_reader.h
+    gesture_predictor.h
+    hand_detector_process_launcher.h
+    hand_detector_process_launcher.cpp
     timer.h
     timer.cpp
     resources.h
