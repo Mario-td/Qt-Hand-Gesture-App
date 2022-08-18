@@ -17,6 +17,10 @@ void SharedMemoryReader::readCoordinatesFromMemory()
         }
     }
 }
+float *SharedMemoryReader::getCoordinatesMemoryLocation()
+{
+    return static_cast<float *>(region->get_address());
+}
 
 void SharedMemoryReader::mapSharedMemory()
 {

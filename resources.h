@@ -6,4 +6,6 @@
 #define WAITING_GIF_PATH "./images/waiting.gif"
 #define BULB_GIF_PATH "./images/bulb.gif"
 
+#define GESTURE_CLASSIFIER_MODEL_PATH "./hand_gestures_classifier2.pt"
+
 #endif // RESOURCES_H

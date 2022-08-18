@@ -6,8 +6,9 @@ MainWindow::MainWindow(QWidget *parent) :
     initializeUIComponents();
     startCapturerThread();
 
-    QTimer::singleShot(5000, this, &MainWindow::giveUserInstructions);
-    QTimer::singleShot(10000, this, &MainWindow::askToPressButton);
+    // 5000 10000
+    QTimer::singleShot(0, this, &MainWindow::giveUserInstructions);
+    QTimer::singleShot(10, this, &MainWindow::askToPressButton);
 }
 
 MainWindow::~MainWindow()
@@ -55,17 +56,14 @@ void MainWindow::initializeUIComponents()
     connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(startRecording()));
 
     // Gestures gifs
-    QStringList nameFilters;
-    nameFilters << "*.gif";
-    QFileInfoList files = QDir(GESTURES_GIFS_PATH).entryInfoList(
-                              nameFilters, QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
     QFont gestureNameFont("Sans Serif", 15, QFont::Bold);
 
     // Populates the gesture gif list
-    for (int i = 0, n = files.size(); i < n; ++i) {
+    for (int i = 0; i < Utilities::NUMBER_OF_GESTURES; ++i) {
         gestureGifList->append(new QLabel());
         gestureGifMovieList->append(new QMovie(gestureGifList->back()));
-        gestureGifMovieList->back()->setFileName(files[i].filePath());
+        gestureGifMovieList->back()->setFileName(QString(GESTURES_GIFS_PATH) +
+                                                 QString::fromStdString( "/" + std::string(Utilities::GESTURE_NAMES[i]) + ".gif"));
         gestureGifList->back()->setMovie(gestureGifMovieList->back());
 
         // Resize gestures gifs
@@ -76,9 +74,8 @@ void MainWindow::initializeUIComponents()
         mainLayout->addWidget(gestureGifList->back(), 11, i, Qt::AlignHCenter);
 
         // Gestures names
-        QString name = files[i].baseName();
         gestureNameList->append(new QLabel(this));
-        gestureNameList->back()->setText(name);
+        gestureNameList->back()->setText(Utilities::GESTURE_NAMES[i]);
         gestureNameList->back()->setFont(gestureNameFont);
         gestureNameList->back()->setAlignment(Qt::AlignHCenter);
         mainLayout->addWidget(gestureNameList->back(), 12, i, Qt::AlignHCenter);
@@ -109,7 +106,6 @@ void MainWindow::startCapturerThread()
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
     connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
     connect(capturer, &CaptureThread::resultReady, this, &MainWindow::updateWindowAfterPredicting);
-
     capturer->start();
 }
 
@@ -128,8 +124,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Space && recordButton->isVisible())
         startRecording();
-    else if (event->key() == Qt::Key_Escape)
+    else if (event->key() == Qt::Key_Escape) {
+        capturer->running = false;
         this->close();
+    }
 }
 
 void MainWindow::giveUserInstructions()
@@ -148,7 +146,7 @@ void MainWindow::askToPressButton()
 
 void MainWindow::updateFrame(cv::Mat *mat)
 {
-    if (capturer->getRunning()) {
+    if (capturer->running) {
 
         displayFrameLock->lock();
         currentFrame = *mat;
@@ -198,8 +196,9 @@ void MainWindow::updateWindowAfterRecording()
     topText->setText(THINK_MSG);
 }
 
-void MainWindow::updateWindowAfterPredicting(int ii)//
+void MainWindow::updateWindowAfterPredicting(int gestureIndex)//
 {
+    std::cout << "GESTURE: " << gestureIndex << "\n";
     // Change the waiting gif for the bulb
     imageScene->removeItem(actionGif->graphicsProxy);
     delete actionGif;
@@ -210,9 +209,9 @@ void MainWindow::updateWindowAfterPredicting(int ii)//
     imageScene->update();
 
     topText->setText(QString(GUESSED_MSG)
-                     + QString(gestureNameList->at(ii)->text()));
+                     + QString(gestureNameList->at(gestureIndex)->text()));
     for (int i = 0, n = gestureNameList->size(); i < n; i++) {
-        if (i != ii) {
+        if (i != gestureIndex) {
             gifOpacityEffect->at(i)->setEnabled(true);
             gestureNameList->at(i)->setHidden(true);
         }

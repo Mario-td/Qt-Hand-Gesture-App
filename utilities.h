@@ -10,7 +10,6 @@ public:
     static constexpr int TRAIN_IMAGE_HEIGHT = 256;
     static constexpr int TRAIN_IMAGE_WIDTH = 256;
     static constexpr double LABEL_MIN = 0.2;
-    static constexpr int NUMBER_GESTURES = 5;
     static constexpr int FRAME_WIDTH = 640;
     static constexpr int FRAME_HEIGHT = 480;
 
@@ -19,7 +18,8 @@ public:
     static constexpr unsigned short NUM_KEYPOINTS = 21;
 
     // Gesture labels
-    static constexpr const char *GESTURE_NAMES[] = {"WAVING", "SCISSORS", "FLIP", "PUSH&PULL", "OPEN&CLOSE"};
+    static constexpr const char *GESTURE_NAMES[] {"WAVING", "SCISSORS", "FLIP", "PUSH&PULL", "OPEN&CLOSE"};
+    static constexpr int NUMBER_OF_GESTURES {sizeof(GESTURE_NAMES) / sizeof(char *)};
 
     static void nmslocation(cv::Mat &src, std::map<float, cv::Point2f, std::greater<float>> &location,
                             float threshold);

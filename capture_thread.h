@@ -13,7 +13,7 @@
 #include <QMutex>
 #include <QQueue>
 
-#define GESTURE_DURATION 5000// in ms
+#define GESTURE_DURATION 3200// in ms
 
 class CaptureThread : public QThread
 {
@@ -21,14 +21,7 @@ class CaptureThread : public QThread
 public:
     CaptureThread(int camera, QMutex *lock);
     ~CaptureThread();
-    bool getRunning() const
-    {
-        return *running;
-    };
-    QMutex *getPredictingDataLock() const
-    {
-        return predictingDataLock;
-    };
+    bool running;
     void startIntervalTimer();
     int getIntervalElapsedTime() const;
     void setRecording(bool record);
@@ -38,7 +31,7 @@ public:
     HandDetectorProcessLauncher worker{};
 
 private:
-    cv::VideoCapture *cap;
+    cv::VideoCapture cap;
     void recordGesture(const cv::Mat &frame);
 
 protected:
@@ -61,7 +54,6 @@ signals:
     void finishedRecording();
 
 private:
-    std::shared_ptr<bool> running;
     bool recording;
     bool displaying;
     int cameraID;
@@ -70,8 +62,7 @@ private:
     Timer timer = Timer(GESTURE_DURATION, Utilities::FRAMES_PER_SEQUENCE);
     cv::Mat frame;
 
-    // for predicting thread
-    QMutex *predictingDataLock;
+    QMutex *predictingGestureLock;
 };
 
 #endif // CAPTURETHREAD_H

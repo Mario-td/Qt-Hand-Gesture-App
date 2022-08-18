@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QDir>
 #include <QTimer>
+#include <QString>
 
 #define CAM_ID 0
 #define INTRO_MSG "Hi! Give me commands with your hand"
@@ -37,7 +38,7 @@ public:
     ~MainWindow();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     // GUI elements
@@ -92,7 +93,7 @@ private slots:
     void updateFrame(cv::Mat *);
     void startRecording();
     void updateWindowAfterRecording();
-    void updateWindowAfterPredicting(int ii);
+    void updateWindowAfterPredicting(int gestureIndex);
     void resetUI();
     void askToPressButton();
     void giveUserInstructions();

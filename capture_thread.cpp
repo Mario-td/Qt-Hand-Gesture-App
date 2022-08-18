@@ -1,18 +1,17 @@
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(int camera, QMutex *lock):
-    recording(false), displaying(false), cameraID(camera),
+    running(true), recording(false), displaying(false), cameraID(camera),
     displayFrameLock(lock)
 {
-    predictingDataLock = new QMutex();
-    running = std::make_shared<bool>(true);
+    predictingGestureLock = new QMutex();
 }
 
 CaptureThread::~CaptureThread()
 {
     worker.killHandDetectorProccess();
     worker.exit();
-    cap->release();
+    cap.release();
 }
 
 void CaptureThread::startIntervalTimer()
@@ -28,14 +27,14 @@ int CaptureThread::getIntervalElapsedTime() const
 void CaptureThread::run()
 {
     // get the camera ready
-    cap = new cv::VideoCapture(cv::CAP_V4L2);
+    cap = cv::VideoCapture(cv::CAP_V4L2);
     cv::Mat tmpFrame;
 
-    cap->set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
-    cap->set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
 
-    while (*running) {
-        *cap >> tmpFrame;
+    while (running) {
+        cap >> tmpFrame;
         if (tmpFrame.empty()) break;
         cv::flip(tmpFrame, tmpFrame, 1);
 
@@ -56,16 +55,14 @@ void CaptureThread::run()
             emit frameCaptured(&frame);
         }
     }
-
-    *running = false;
 }
 
 void CaptureThread::recordGesture(const cv::Mat &frame)
 {
     static int sequenceFrameIdx = 0;
-    predictingDataLock->lock();
+    predictingGestureLock->lock();
     shMemoryWriter.writeFrameToMemory(frame, sequenceFrameIdx++);
-    predictingDataLock->unlock();
+    predictingGestureLock->unlock();
 
     // resets the variables when the sequence finishes
     if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
@@ -77,7 +74,8 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 void CaptureThread::predictGesture()
 {
     emit finishedRecording();
-    while (!worker.isFinished());
+    while (!worker.isFinished())
+        ;
     emit resultReady(gesturePredictor.runModel()); ;
     setRecording(false);
     setDisplaying(false);

@@ -40,6 +40,7 @@ add_executable(Qt-Hand-Gesture-App
     shared_memory_reader.cpp
     shared_memory_reader.h
     gesture_predictor.h
+    gesture_predictor.cpp
     hand_detector_process_launcher.h
     hand_detector_process_launcher.cpp
     timer.h

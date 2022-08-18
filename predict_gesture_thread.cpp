@@ -108,7 +108,7 @@ void PredictGestureThread::passThroughGestureModel()
     auto output = gestureClassificationModel.forward(gestureClassificationModelInput).toTensor();
 
     // signal with the predicted gesture
-    emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
+    //emit finishedPrediction(Utilities::GESTURE_NAMES[output.argmax(1).item().toInt()]);
 
     QThread::sleep(6);
 

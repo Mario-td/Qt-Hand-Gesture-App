@@ -11,6 +11,7 @@ class SharedMemoryReader
 public:
     SharedMemoryReader();
     void readCoordinatesFromMemory();
+    float *getCoordinatesMemoryLocation();
 private:
     // Create a shared memory object.
     boost::interprocess::shared_memory_object shm = boost::interprocess::shared_memory_object(
