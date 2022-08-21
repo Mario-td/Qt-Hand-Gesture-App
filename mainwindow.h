@@ -21,7 +21,6 @@
 #include <QTimer>
 #include <QString>
 
-#define CAM_ID 0
 #define INTRO_MSG "Hi! Give me commands with your hand"
 #define INSTRUCTIONS_MSG "make some of the gestures listed below"
 #define ASK_MSG "click \"Record\" or press spacebar and start"
@@ -35,7 +34,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -80,7 +78,7 @@ private:
     QList<QGraphicsDropShadowEffect *> *gestureNameTextShadow = new QList<QGraphicsDropShadowEffect *>;
 
     QMutex *displayFrameLock = new QMutex();
-    CaptureThread *capturer = new CaptureThread(CAM_ID, displayFrameLock);
+    CaptureThread *capturer = new CaptureThread(displayFrameLock);
     cv::Mat currentFrame;
 
     void initializeUIComponents();

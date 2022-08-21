@@ -17,7 +17,7 @@
 #include "mediapipe/calculators/util/landmarks_to_render_data_calculator.pb.h"
 #include "mediapipe/framework/formats/landmark.pb.h"
 
-#define NUM_LANDMARKS 21
+#include "constants.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
@@ -43,8 +43,8 @@ public:
 
     void resetCoordinates()
     {
-        memset(this->coordinates, 0, sizeof(float) * NUM_LANDMARKS * 2);
+        memset(this->coordinates, 0, sizeof(float) * NUM_KEYPOINTS * 2);
     }
 
-    float coordinates[NUM_LANDMARKS * 2] = {0};
+    float coordinates[NUM_KEYPOINTS * 2] = {0};
 };

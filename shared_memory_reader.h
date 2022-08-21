@@ -4,13 +4,12 @@
 #include "boost/interprocess/shared_memory_object.hpp"
 #include "boost/interprocess/mapped_region.hpp"
 
-#include "utilities.h"
+#include "constants.h"
 
 class SharedMemoryReader
 {
 public:
     SharedMemoryReader();
-    void readCoordinatesFromMemory();
     float *getCoordinatesMemoryLocation();
 private:
     // Create a shared memory object.

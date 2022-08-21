@@ -15,7 +15,7 @@ void SharedMemoryWriter::writeFrameToMemory(const cv::Mat &frame, int index)
 
 void SharedMemoryWriter::allocateSharedMemory()
 {
-    shm.truncate(image_size_bytes * Utilities::FRAMES_PER_SEQUENCE);
+    shm.truncate(image_size_bytes * FRAMES_PER_SEQUENCE);
     region = new boost::interprocess::mapped_region(shm, boost::interprocess::read_write);
     std::memset(region->get_address(), 0, region->get_size());
 }

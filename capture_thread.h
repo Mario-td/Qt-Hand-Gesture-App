@@ -2,12 +2,13 @@
 #define CAPTURETHREAD_H
 
 #include "timer.h"
-#include "utilities.h"
+#include "constants.h"
 #include "shared_memory_writer.h"
 #include "gesture_predictor.h"
 #include "hand_detector_process_launcher.h"
 
 #include "opencv2/videoio.hpp"
+#include "opencv2/opencv.hpp"
 
 #include <QElapsedTimer>
 #include <QMutex>
@@ -19,27 +20,18 @@ class CaptureThread : public QThread
 {
     Q_OBJECT
 public:
-    CaptureThread(int camera, QMutex *lock);
+    CaptureThread(QMutex *lock);
     ~CaptureThread();
     bool running;
-    void startIntervalTimer();
-    int getIntervalElapsedTime() const;
     void setRecording(bool record);
-    void predictGesture();
-    SharedMemoryWriter shMemoryWriter{};
-    GesturePredictor gesturePredictor{};
-    HandDetectorProcessLauncher worker{};
 
 private:
     cv::VideoCapture cap;
     void recordGesture(const cv::Mat &frame);
+    void predictGesture();
 
 protected:
     void run() override;
-
-public:
-signals:
-    void resultReady(const int &i);
 
 public slots:
     void setDisplaying(const bool &display)
@@ -48,20 +40,20 @@ public slots:
     };
 
 signals:
-    void hiMessage();
-    void howToUseInfo();
+    void resultReady(const int &);
     void frameCaptured(cv::Mat *data);
     void finishedRecording();
 
 private:
     bool recording;
     bool displaying;
-    int cameraID;
     QMutex *displayFrameLock;
     QElapsedTimer frameIntervalTimer;
-    Timer timer = Timer(GESTURE_DURATION, Utilities::FRAMES_PER_SEQUENCE);
-    cv::Mat frame;
-
+    Timer timer = Timer(GESTURE_DURATION, FRAMES_PER_SEQUENCE);
+    cv::Mat frame{};
+    SharedMemoryWriter shMemoryWriter{};
+    GesturePredictor gesturePredictor{};
+    HandDetectorProcessLauncher parallelProcessLauncher{};
     QMutex *predictingGestureLock;
 };
 

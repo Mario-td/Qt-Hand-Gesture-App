@@ -6,15 +6,11 @@
 
 #include "handlandmarksCPU.h"
 
-#define NUM_FRAMES 32
-#define FRAME_WIDTH 640
-#define FRAME_HEIGHT 480 
-
 int main(int argc, char** argv) {
 
 	using namespace boost::interprocess;
 
-	size_t landmark_coordinates_bytes = NUM_LANDMARKS * 2 * sizeof(float); // Size for all the landmarks x's and y's
+	size_t landmark_coordinates_bytes = NUM_KEYPOINTS * 2 * sizeof(float); // Size for all the landmarks x's and y's
 
 	// Child process
 
@@ -36,7 +32,7 @@ int main(int argc, char** argv) {
 	HandlandmarksDetectorCPU handlandmarksDetector("hand_tracking_desktop_live.pbtxt");
 	cv::Mat output_image;
 	
-	for (int i = 0; i < NUM_FRAMES; ++i)
+	for (int i = 0; i < FRAMES_PER_SEQUENCE; ++i)
 	{
 		semaphore.wait();
 		cv::Mat image(cv::Size(FRAME_WIDTH, FRAME_HEIGHT), CV_8UC3, image_buff + image_size_bytes * i, cv::Mat::AUTO_STEP);
@@ -46,9 +42,10 @@ int main(int argc, char** argv) {
 		output_image = handlandmarksDetector.DetectLandmarks(output_image);
 
 		// Write the landmark coordinates
-		memcpy(&coordinates_buff[i * NUM_LANDMARKS * 2], handlandmarksDetector.coordinates, landmark_coordinates_bytes);
+		memcpy(&coordinates_buff[i * NUM_KEYPOINTS * 2], handlandmarksDetector.coordinates, landmark_coordinates_bytes);
 
-		for (int j = 0; j < NUM_LANDMARKS * 2; j+=2)
+		/*
+		for (int j = 0; j < NUM_KEYPOINTS * 2; j+=2)
 		{
 			std::cout << "\nWriter Landmark " << j / 2 << ":" << std::endl;
 			std::cout << "\tx:" << handlandmarksDetector.coordinates[j] << std::endl;
@@ -56,11 +53,12 @@ int main(int argc, char** argv) {
 				std::cout << "\tx:" << coordinates_buff[i * NUM_LANDMARKS * 2 + j] << std::endl;
 				std::cout << "\ty:" << coordinates_buff[i * NUM_LANDMARKS * 2 + j + 1] << std::endl;
 		}
+		*/
+
 		handlandmarksDetector.resetCoordinates();
+
 		//cv::imshow("Display window", output_image);
 		//cv::waitKey(0); 
 	}
-
-	std::cout << "Wait" << "\n";
 	return 0;
 }

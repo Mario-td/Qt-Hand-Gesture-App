@@ -6,14 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     initializeUIComponents();
     startCapturerThread();
 
-    // 5000 10000
-    QTimer::singleShot(0, this, &MainWindow::giveUserInstructions);
-    QTimer::singleShot(10, this, &MainWindow::askToPressButton);
-}
-
-MainWindow::~MainWindow()
-{
-    capturer->exit();
+    QTimer::singleShot(5000, this, &MainWindow::giveUserInstructions);
+    QTimer::singleShot(10000, this, &MainWindow::askToPressButton);
 }
 
 void MainWindow::initializeUIComponents()
@@ -59,11 +53,11 @@ void MainWindow::initializeUIComponents()
     QFont gestureNameFont("Sans Serif", 15, QFont::Bold);
 
     // Populates the gesture gif list
-    for (int i = 0; i < Utilities::NUMBER_OF_GESTURES; ++i) {
+    for (int i = 0; i < NUMBER_OF_GESTURES; ++i) {
         gestureGifList->append(new QLabel());
         gestureGifMovieList->append(new QMovie(gestureGifList->back()));
         gestureGifMovieList->back()->setFileName(QString(GESTURES_GIFS_PATH) +
-                                                 QString::fromStdString( "/" + std::string(Utilities::GESTURE_NAMES[i]) + ".gif"));
+                                                 QString::fromStdString( "/" + std::string(GESTURE_NAMES[i]) + ".gif"));
         gestureGifList->back()->setMovie(gestureGifMovieList->back());
 
         // Resize gestures gifs
@@ -75,7 +69,7 @@ void MainWindow::initializeUIComponents()
 
         // Gestures names
         gestureNameList->append(new QLabel(this));
-        gestureNameList->back()->setText(Utilities::GESTURE_NAMES[i]);
+        gestureNameList->back()->setText(GESTURE_NAMES[i]);
         gestureNameList->back()->setFont(gestureNameFont);
         gestureNameList->back()->setAlignment(Qt::AlignHCenter);
         mainLayout->addWidget(gestureNameList->back(), 12, i, Qt::AlignHCenter);
@@ -198,7 +192,6 @@ void MainWindow::updateWindowAfterRecording()
 
 void MainWindow::updateWindowAfterPredicting(int gestureIndex)//
 {
-    std::cout << "GESTURE: " << gestureIndex << "\n";
     // Change the waiting gif for the bulb
     imageScene->removeItem(actionGif->graphicsProxy);
     delete actionGif;

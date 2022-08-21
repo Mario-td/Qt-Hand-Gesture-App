@@ -1,27 +1,16 @@
 #include "capture_thread.h"
 
-CaptureThread::CaptureThread(int camera, QMutex *lock):
-    running(true), recording(false), displaying(false), cameraID(camera),
-    displayFrameLock(lock)
+CaptureThread::CaptureThread(QMutex *lock):
+    running(true), recording(false), displaying(false),
+    displayFrameLock(lock), predictingGestureLock(new QMutex())
 {
-    predictingGestureLock = new QMutex();
 }
 
 CaptureThread::~CaptureThread()
 {
-    worker.killHandDetectorProccess();
-    worker.exit();
+    parallelProcessLauncher.killHandDetectorProccess();
+    parallelProcessLauncher.exit();
     cap.release();
-}
-
-void CaptureThread::startIntervalTimer()
-{
-    frameIntervalTimer.start();
-}
-
-int CaptureThread::getIntervalElapsedTime() const
-{
-    return frameIntervalTimer.elapsed();
 }
 
 void CaptureThread::run()
@@ -30,8 +19,8 @@ void CaptureThread::run()
     cap = cv::VideoCapture(cv::CAP_V4L2);
     cv::Mat tmpFrame;
 
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, Utilities::FRAME_WIDTH);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, Utilities::FRAME_HEIGHT);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
 
     while (running) {
         cap >> tmpFrame;
@@ -42,7 +31,6 @@ void CaptureThread::run()
             if (timer.readyForNextInterval()) {
                 recordGesture(tmpFrame);
                 timer.nextInterval();
-                std::cout << timer.elapsedTimer.elapsed() << std::endl;
             }
         }
 
@@ -65,7 +53,7 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
     predictingGestureLock->unlock();
 
     // resets the variables when the sequence finishes
-    if (sequenceFrameIdx > Utilities::FRAMES_PER_SEQUENCE - 1) {
+    if (sequenceFrameIdx > FRAMES_PER_SEQUENCE - 1) {
         predictGesture();
         sequenceFrameIdx = 0;
     }
@@ -74,7 +62,7 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 void CaptureThread::predictGesture()
 {
     emit finishedRecording();
-    while (!worker.isFinished())
+    while (!parallelProcessLauncher.isFinished())
         ;
     emit resultReady(gesturePredictor.runModel()); ;
     setRecording(false);
@@ -83,8 +71,7 @@ void CaptureThread::predictGesture()
 
 void CaptureThread::setRecording(bool record)
 {
-    startIntervalTimer();
     recording = record;
-    worker.start();
+    parallelProcessLauncher.start();
     timer.start();
 };

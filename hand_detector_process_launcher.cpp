@@ -2,13 +2,10 @@
 
 void HandDetectorProcessLauncher::run()
 {
-    int result = 2;
-    std::string
-    s("GLOG_logtostderr=1 ~/mediapipe/bazel-bin/Qt-Hand-Gesture-App/hand_tracking_cpu");
-    std::system(s.c_str());
+    std::system(PREDICT_GESTURE_PROCESS_COMMAND);
 }
 
 void HandDetectorProcessLauncher::killHandDetectorProccess()
 {
-    std::system("kill $(ps aux | grep 'Qt-Hand-Gesture-App/hand_tracking_cpu' | grep -v grep | awk '{print $2}')");
+    std::system(KILL_PREDICT_GESTURE_PROCESS_COMMAND);
 }

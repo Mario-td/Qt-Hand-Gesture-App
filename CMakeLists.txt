@@ -29,12 +29,8 @@ add_executable(Qt-Hand-Gesture-App
     main.cpp
     mainwindow.cpp
     mainwindow.h
-    utilities.cpp
-    utilities.h
     capture_thread.cpp
     capture_thread.h
-    predict_gesture_thread.cpp
-    predict_gesture_thread.h
     shared_memory_writer.h
     shared_memory_writer.cpp
     shared_memory_reader.cpp
@@ -46,6 +42,7 @@ add_executable(Qt-Hand-Gesture-App
     timer.h
     timer.cpp
     resources.h
+    constants.h
     )
 
 target_link_libraries(Qt-Hand-Gesture-App PRIVATE Qt5::Widgets

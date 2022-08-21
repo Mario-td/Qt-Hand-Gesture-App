@@ -3,11 +3,12 @@
 
 #include <cstdlib>
 
+#include "opencv2/videoio.hpp"
 #include "boost/interprocess/shared_memory_object.hpp"
 #include "boost/interprocess/mapped_region.hpp"
 #include "boost/interprocess/sync/named_semaphore.hpp"
 
-#include "utilities.h"
+#include "constants.h"
 
 class SharedMemoryWriter
 {
@@ -18,8 +19,8 @@ public:
 
 private:
     static constexpr size_t landmark_coordinates_bytes =
-        Utilities::NUM_KEYPOINTS * 2 * sizeof(float); // Size for all the landmarks x's and y's
-    static constexpr size_t image_size_bytes = Utilities::FRAME_WIDTH * Utilities::FRAME_HEIGHT * 3;
+        NUM_KEYPOINTS * 2 * sizeof(float); // Size for all the landmarks x's and y's
+    static constexpr size_t image_size_bytes = FRAME_WIDTH * FRAME_HEIGHT * 3;
 
     // Remove shared memory on construction and destruction
     struct shm_remove {

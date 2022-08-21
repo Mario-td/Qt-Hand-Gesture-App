@@ -8,8 +8,8 @@ class Timer
 private:
     uint durationPerInterval;
     uint currentInteval = 0;
-public:
     QElapsedTimer elapsedTimer;
+public:
     Timer() = delete;
     Timer(uint duration, uint numberOfIntervals);
 
