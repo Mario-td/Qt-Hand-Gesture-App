@@ -1,8 +1,7 @@
 #include "capture_thread.h"
 
 CaptureThread::CaptureThread(QMutex *lock):
-    running(true), recording(false), displaying(false),
-    displayFrameLock(lock), predictingGestureLock(new QMutex())
+    displayFrameLock(lock)
 {
 }
 
@@ -61,7 +60,6 @@ void CaptureThread::recordGesture(const cv::Mat &frame)
 
 void CaptureThread::predictGesture()
 {
-    emit finishedRecording();
     while (!parallelProcessLauncher.isFinished())
         ;
     emit resultReady(gesturePredictor.runModel()); ;

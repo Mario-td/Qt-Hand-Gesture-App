@@ -15,7 +15,7 @@ private:
     // Create a shared memory object.
     boost::interprocess::shared_memory_object shm = boost::interprocess::shared_memory_object(
                                                         boost::interprocess::open_only, "MySharedMemory", boost::interprocess::read_write);
-    boost::interprocess::mapped_region *region;
+    boost::interprocess::mapped_region *region{};
     void mapSharedMemory();
     float *coordinates_buff;
 };

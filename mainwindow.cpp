@@ -98,7 +98,6 @@ void MainWindow::startCapturerThread()
 {
     // Signals and slots connections
     connect(capturer, &CaptureThread::frameCaptured, this, &MainWindow::updateFrame);
-    connect(capturer, &CaptureThread::finishedRecording, this, &MainWindow::updateWindowAfterRecording);
     connect(capturer, &CaptureThread::resultReady, this, &MainWindow::updateWindowAfterPredicting);
     capturer->start();
 }
@@ -171,9 +170,9 @@ void MainWindow::startRecording()
     recordButton->setVisible(false);
 }
 
-void MainWindow::updateWindowAfterRecording()
+void MainWindow::updateWindowAfterPredicting(int gestureIndex)//
 {
-    // Clears the scene and adds the gif items
+    // Change the waiting gif for the bulb
     imageScene->clear();
     robotGif = new SceneGif();
     robotGif->graphics->show();
@@ -181,24 +180,10 @@ void MainWindow::updateWindowAfterRecording()
     setupGif(robotGif->label, robotGif->movie, robotGif->graphicsProxy,
              ROBOT_GIF_PATH, 0, 20);
     setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
-             WAITING_GIF_PATH, 210, 0);
+             BULB_GIF_PATH, 210, 0);
     imageScene->addItem(robotGif->graphicsProxy);
     imageScene->addItem(actionGif->graphicsProxy);
     imageView->setSceneRect(robotGif->label->rect());
-    imageScene->update();
-
-    topText->setText(THINK_MSG);
-}
-
-void MainWindow::updateWindowAfterPredicting(int gestureIndex)//
-{
-    // Change the waiting gif for the bulb
-    imageScene->removeItem(actionGif->graphicsProxy);
-    delete actionGif;
-    actionGif = new SceneGif();
-    setupGif(actionGif->label, actionGif->movie, actionGif->graphicsProxy,
-             BULB_GIF_PATH, 210, -10);
-    imageScene->addItem(actionGif->graphicsProxy);
     imageScene->update();
 
     topText->setText(QString(GUESSED_MSG)
@@ -226,7 +211,7 @@ void MainWindow::resetUI()
     recordButton->setVisible(true);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     capturer->exit();
     capturer->~CaptureThread();

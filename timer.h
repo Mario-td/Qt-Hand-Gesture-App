@@ -5,10 +5,6 @@
 
 class Timer
 {
-private:
-    uint durationPerInterval;
-    uint currentInteval = 0;
-    QElapsedTimer elapsedTimer;
 public:
     Timer() = delete;
     Timer(uint duration, uint numberOfIntervals);
@@ -17,5 +13,9 @@ public:
     bool readyForNextInterval();
     void nextInterval();
 
+private:
+    uint durationPerInterval{};
+    uint currentInteval{0};
+    QElapsedTimer elapsedTimer{};
 };
 #endif // TIMER_H

@@ -10,9 +10,7 @@
 #include "opencv2/videoio.hpp"
 #include "opencv2/opencv.hpp"
 
-#include <QElapsedTimer>
 #include <QMutex>
-#include <QQueue>
 
 #define GESTURE_DURATION 3200// in ms
 
@@ -22,7 +20,7 @@ class CaptureThread : public QThread
 public:
     CaptureThread(QMutex *lock);
     ~CaptureThread();
-    bool running;
+    bool running = true;
     void setRecording(bool record);
 
 private:
@@ -42,19 +40,17 @@ public slots:
 signals:
     void resultReady(const int &);
     void frameCaptured(cv::Mat *data);
-    void finishedRecording();
 
 private:
-    bool recording;
-    bool displaying;
-    QMutex *displayFrameLock;
-    QElapsedTimer frameIntervalTimer;
+    bool recording = false;
+    bool displaying = false;
     Timer timer = Timer(GESTURE_DURATION, FRAMES_PER_SEQUENCE);
     cv::Mat frame{};
     SharedMemoryWriter shMemoryWriter{};
     GesturePredictor gesturePredictor{};
     HandDetectorProcessLauncher parallelProcessLauncher{};
-    QMutex *predictingGestureLock;
+    QMutex *predictingGestureLock = new QMutex();
+    QMutex *displayFrameLock;
 };
 
 #endif // CAPTURETHREAD_H

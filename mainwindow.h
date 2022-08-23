@@ -17,7 +17,6 @@
 #include <QList>
 #include <QMovie>
 #include <QLabel>
-#include <QDir>
 #include <QTimer>
 #include <QString>
 
@@ -31,7 +30,6 @@
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -79,18 +77,17 @@ private:
 
     QMutex *displayFrameLock = new QMutex();
     CaptureThread *capturer = new CaptureThread(displayFrameLock);
-    cv::Mat currentFrame;
+    cv::Mat currentFrame{};
 
     void initializeUIComponents();
     void startCapturerThread();
     void setupGif(QLabel *gif, QMovie *movieGif, QGraphicsProxyWidget *graphicsProxyGif,
                   const QString &path, const int &PosX, const int &PosY);
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *) override;
 
 private slots:
     void updateFrame(cv::Mat *);
     void startRecording();
-    void updateWindowAfterRecording();
     void updateWindowAfterPredicting(int gestureIndex);
     void resetUI();
     void askToPressButton();
