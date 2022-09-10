@@ -4,7 +4,7 @@
 <h1 align="center">Qt Hand Gesture App</h1>
 <p align="center">An application for hand gesture classification</p>
 <p align="center">
-    <a href="https://www.youtube.com/watch?fbclid=IwAR3mIMSDKiGlsY23Tmc96Ih72cW03VPU0ePLkMbh1jnjijmjytIwJfibA4I&v=H1PUaA6VzWk&feature=youtu.bek">Watch Demo</a>
+    <a href="https://youtu.be/kHhg56lZHOE">Watch Demo</a>
     ·
 <a href="https://github.com/Mario-td/Qt-Hand-Gesture-App/issues">Request Feature</a>
     ·
