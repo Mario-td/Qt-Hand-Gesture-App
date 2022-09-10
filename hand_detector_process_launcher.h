@@ -3,7 +3,7 @@
 
 #include <QThread>
 
-#define PREDICT_GESTURE_PROCESS_COMMAND "GLOG_logtostderr=1 ~/mediapipe/bazel-bin/Qt-Hand-Gesture-App/hand_tracking_cpu"
+#define PREDICT_GESTURE_PROCESS_COMMAND "GLOG_logtostderr=1 ../bazel-bin/Qt-Hand-Gesture-App/hand_tracking_cpu"
 #define KILL_PREDICT_GESTURE_PROCESS_COMMAND "kill $(ps aux | grep 'Qt-Hand-Gesture-App/hand_tracking_cpu' | grep -v grep | awk '{print $2}')"
 
 // This thread executes the process that detects handlandmarks

@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list(APPEND CMAKE_PREFIX_PATH "~/libtorch")
+#list(APPEND CMAKE_PREFIX_PATH "~/libtorch")
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Torch REQUIRED)

@@ -44,47 +44,51 @@
 <ul>
     <li>Building a custom dataset with more than 3,700 gestures with the contribution of 7 people</li>
     <li>Data cleaning and data augmentation applying spatio-temporal transformations</li>
-    <li>Training and fine-tunning a deep neural network model from scratch using the 2D hand keypoint location data, covered <a href="https://github.com/Mario-td/Hand-Gesture-Classification-with-Tensorflow-2.0">here</a></li> 
-    <li>Building a program to record the gestures and perform the inference, also covered <a href="https://github.com/Mario-td/Inference-for-Hand-Gesture-Classification">here</a></li>
-    <li>Creating a user-friendly GUI using multithreading programming</li>
+    <li>Training and fine-tunning a deep neural network model from scratch using the 2D hand keypoint location data
+    <li>Building a program to record the gestures and perform the inference
+    <li>Creating a user-friendly GUI using concurrent programming</li>
 </ul>
 
 <h3 id="technologies">Technologies</h3>
 
 <ul>
+    <li><a href="https://google.github.io/mediapipe">Mediapipe</a></li>
     <li><a href="https://www.qt.io/download">Qt 5.14.1</a></li>
-    <li><a href="https://github.com/opencv/">OpenCV 4.0.0 </a>(with CUDA)</li> <li><a href="https://pytorch.org/">LibTorch</a> (with CUDA)</li> </ul> <h2 id="getting-started">Getting Started</h2> 
-<h3 id="prerequisites">Prerequisites</h3>
+    <li><a href="https://github.com/opencv/">OpenCV 4.0.0 </a></li> 
+    <li><a href="https://pytorch.org/">LibTorch</a></li> 
+    <li><a href="https://www.boost.org/">Boost</a></li> </ul>
+    <h3 id="prerequisites">Prerequisites</h3>
+    Download and install the aforementioned technologies
 
-<p>Make sure to get the compatible NVIDIA drivers and libraries, the following toolkit and library are needed:</p>
-
-<ul>
-    <li><a href="https://developer.nvidia.com/cuda-downloads">CUDA 10.1+</a></li>
-    <li><a href="https://developer.nvidia.com/cuDNN">CuDNN 7.6+</a></li> 
-</ul>
-
+<br>
 <h3 id="build">Build</h3>
 
-Clone this repository
+Clone this repository inside of mediapipe repository
+
 ```shell
-git clone https://github.com/Mario-td/Qt-Hand-Gesture-App.git 
+git clone https://github.com/Mario-td/Qt-Hand-Gesture-App.git
 cd Qt-Hand-Gesture-App
 ```
 
-Build the executables
+Append the file "WORKSPACE_attachment.txt" to the mediapipe WORKSPACE file
+
 ```shell
+cat WORKSPACE_attachment.txt >> ../WORKSPACE
+```
+
+Build the executables
+
+```shell
+bazel build -c opt --define MEDIAPIPE_DISABLE_GPU=1 hand_tracking_cpu
 cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch .
 make
 ```
 
 Run the application
+
 ```shell
 ./Qt-Hand-Gesture-App
 ```
-<h2 id="references">References</h2>
-<ul>
-    <li>Y. Wang, B. Zhang, C. Peng,"SRHandNet: Real-Time 2D Hand Pose EstimationWith Simultaneous Region Localization", IEEE, Transactions on Image Processing,Volume 29, Pages 2977 - 2986, DOI:10.1109/TIP.2019.2955280, 2019.</li>
-</ul>
 
 <h2 id="license">License</h2>
 
