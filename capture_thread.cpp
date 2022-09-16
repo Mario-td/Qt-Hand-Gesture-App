@@ -70,6 +70,8 @@ void CaptureThread::predictGesture()
 void CaptureThread::setRecording(bool record)
 {
     recording = record;
-    parallelProcessLauncher.start();
-    timer.start();
+    if (record) {
+        parallelProcessLauncher.start();
+        timer.start();
+    }
 };
